@@ -1,7 +1,11 @@
+import { useNavigation } from 'expo-router';
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ImageBackground } from 'react-native';
 
-export default function Main({ navigation }) {
+export default function Main() {
+
+  const navigation = useNavigation()
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ImageBackground 

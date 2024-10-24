@@ -1,17 +1,19 @@
+import { useNavigation } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function LoginAluno({ navigation }) { // Certifique-se de que navigation está sendo passado
+export default function LoginAluno() { 
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const navigation = useNavigation();
+
   const handleSubmit = () => {
     setLoading(true);
-    // Aqui você pode implementar a lógica de autenticação
-    // Simular o login:
     setTimeout(() => {
       setLoading(false);
       if (email === "admin@example.com" && password === "password") {
