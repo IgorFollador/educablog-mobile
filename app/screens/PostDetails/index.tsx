@@ -1,4 +1,5 @@
 // PostDetails.tsx
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 
@@ -24,6 +25,7 @@ interface PostDetailsProps {
 
 const PostDetails: React.FC<PostDetailsProps> = ({ route }) => {
   const { post } = route.params;
+  const navigation = useNavigation()
 
   return (
     <View style={styles.container}>

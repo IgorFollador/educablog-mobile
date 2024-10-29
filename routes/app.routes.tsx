@@ -20,7 +20,7 @@ export function AppRoutes(){
         component={LoginAluno}/>
 
         <Screen name="PostDetails"
-        component={PostDetails} />
+        component={PostDetails}/>
     </Navigator>
  )
 

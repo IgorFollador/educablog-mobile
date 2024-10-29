@@ -2,43 +2,57 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import Main from '@/app/screens/Main';
 
 interface HeaderProps {
   title: string;
   onBackPress?: () => void;
   showBackButton?: boolean;
+  isLoggedIn: boolean;
+  setIsLoggedIn: (loggedIn: boolean) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, onBackPress, showBackButton = false }) => {
+const Header: React.FC<HeaderProps> = ({ title, onBackPress, showBackButton = false}) => {
   const navigation = useNavigation();
 
-  const openDrawer = () => {
-    navigation.dispatch(DrawerActions.openDrawer());
+  const handleLoginPress = () => {
+    navigation.navigate('Main');
   };
 
   return (
     <View style={styles.container}>
+      {/*
+      Botão removido até definir se né necessário
       {showBackButton && (
         <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
           <Text style={styles.backButtonText}>{'<'}</Text>
         </TouchableOpacity>
       )}
       
-      {/* Botão de Menu deve vir antes do logo */}
+      Botão de Menu removido até configurar openDrawer (se fizer sentido)
       <TouchableOpacity onPress={openDrawer} style={styles.menuButton}>
         <Ionicons name="menu" size={32} color="white" />
       </TouchableOpacity>
-
+*/}
+    
       <Image
-        source={require('@/assets/images/logo.png')} // Caminho para o logo
+        source={require('@/assets/images/logo.png')} 
         style={styles.logo}
         resizeMode="contain"
       />
       
       <Text style={styles.title}>{title}</Text>
+
+      <TouchableOpacity onPress={handleLoginPress} style={styles.loginButton}>
+         <Ionicons name='log-in-outline' size={24} color="#d2a209" />
+        <Text style={styles.loginText}>Login</Text>
+      </TouchableOpacity>
+
     </View>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -48,6 +62,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#182454',
     paddingHorizontal: 16,
     paddingTop: 20,
+    justifyContent: 'space-between',
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   title: {
     fontSize: 22,
@@ -55,24 +74,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 8,
   },
-  backButton: {
-    position: 'absolute',
-    left: 16,
-    padding: 10,
-  },
-  backButtonText: {
-    fontSize: 18,
-    color: '#ffffff',
-  },
+ 
   logo: {
     width: 25,
     height: 25,
-    marginLeft: 10, 
     justifyContent: 'center',
+    alignContent: 'center',
   },
-  menuButton: {
-    marginRight: 60,
-    marginLeft: 0,
+  loginButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  loginText: {
+    fontWeight: '600',
+    color: '#d2a209',
+    marginLeft: 5,
+    fontSize: 16,
   },
 });
 
