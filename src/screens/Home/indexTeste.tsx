@@ -1,10 +1,10 @@
 // Home/index.tsx
+import PostList from '@/src/components/PostList';
+import OldHeader from '@/src/components/shared/Header';
 import React from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
-import Header from '@/components/shared/Header';
-import PostList from '@/components/PostList';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-const Home: React.FC = () => {
+const HomeTeste: React.FC = () => {
   const posts = [
     {
       id: '1',
@@ -34,7 +34,9 @@ const Home: React.FC = () => {
 
   return (
     <View style={styles.screenContainer}>
-      <Header title="EducaBlog" />
+      <OldHeader title="EducaBlog" isLoggedIn={false} setIsLoggedIn={function (loggedIn: boolean): void {
+        throw new Error('Function not implemented.');
+      } } />
 
       <View style={styles.container}>
         <Text style={styles.header}>Lista de Postagens</Text>
@@ -66,4 +68,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Home;
+export default HomeTeste;

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import Main from '@/app/screens/Main';
+import Main from '@/src/screens/Main';
 
 interface HeaderProps {
   title: string;
@@ -12,7 +12,7 @@ interface HeaderProps {
   setIsLoggedIn: (loggedIn: boolean) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, onBackPress, showBackButton = false}) => {
+const OldHeader: React.FC<HeaderProps> = ({ title, onBackPress, showBackButton = false}) => {
   const navigation = useNavigation();
 
   const handleLoginPress = () => {
@@ -93,4 +93,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Header;
+export default OldHeader;

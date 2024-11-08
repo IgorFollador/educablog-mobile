@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function LoginAluno() { 
+export default function LoginAluno() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,11 +34,11 @@ export default function LoginAluno() {
           <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
           <Text style={styles.logoText}>EducaBlog</Text>
         </View>
-        
+
         {/* Título e Descrição */}
         <Text style={styles.title}>Painel Administrativo</Text>
         <Text style={styles.subtitle}>Insira suas credenciais para acessar</Text>
-        
+
         {/* Erro */}
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1e3a8a', 
+    backgroundColor: '#1e3a8a',
     padding: 10,
     borderRadius: 10,
   },
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   error: {
-    color: '#ef4444', 
+    color: '#ef4444',
     marginVertical: 10,
     textAlign: 'center',
   },
@@ -121,11 +121,11 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     marginBottom: 15,
-    borderColor: '#d1d5db', 
+    borderColor: '#d1d5db',
     borderWidth: 1,
   },
   button: {
-    backgroundColor: '#2563eb', 
+    backgroundColor: '#2563eb',
     paddingVertical: 12,
     borderRadius: 8,
     justifyContent: 'center',

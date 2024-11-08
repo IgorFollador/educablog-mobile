@@ -8,16 +8,16 @@ export default function Main() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ImageBackground 
-        source={require('@/assets/images/bg3.png')} 
-        style={styles.backgroundImage} 
+      <ImageBackground
+        source={require('@/assets/images/bg3.png')}
+        style={styles.backgroundImage}
         resizeMode="cover"
       >
         <View style={styles.container}>
-    
+
           <View style={styles.logoContainer}>
             <Image
-              source={require('@/assets/images/logo.png')} 
+              source={require('@/assets/images/logo.png')}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -26,8 +26,8 @@ export default function Main() {
 
           <Text style={styles.title}>Seja Bem-Vindo!</Text>
 
-        
-          <View style={{ 
+
+          <View style={{
             position: 'absolute',
             bottom: 130}}>
           <Text style={styles.subTitle}>Entre aqui:</Text>
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    justifyContent: 'center', 
+    justifyContent: 'center',
     padding: 10,
     borderRadius: 10,
   },
@@ -76,12 +76,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     textDecorationLine: "underline",
- 
+
   },
   title: {
     fontSize: 40,
     fontWeight: 'bold',
-    
+
     color: '#f3f4f6',
     textAlign: 'center',
     marginTop: 40,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '45%',
-    backgroundColor: '#d2a209', 
+    backgroundColor: '#d2a209',
     paddingVertical: 16,
     borderRadius: 8,
     justifyContent: 'center',
@@ -120,6 +120,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-    
+
   },
 });
