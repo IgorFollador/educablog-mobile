@@ -1,41 +1,22 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, Linking } from 'react-native';
+import { View, TouchableOpacity, Linking } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Home from './Home';
 
-export default function Footer() {
-
-  const currentYear = new Date().getFullYear();
-
+export default function App() {
   return (
-    <View className="bg-sky-950 py-4">
-      <View className="flex flex-row justify-between items-center px-5">
-        
-        {/* Logo e Título à esquerda */}
-        <TouchableOpacity className='flex flex-row items-center' onPress={() => {Home} }>
-          <Image
-            source={require('../../assets/images/logo.png')} 
-            style={{ width: 25, height: 25, marginRight: 8 }}
-            resizeMode="contain"
-          />
-          <Text className="text-white text-xl">EducaBlog</Text>
+    <View className="bg-sky-950 py-4 flex-row justify-center items-center px-5 fixed bottom-0 left-0 right-0">
+      {/* Ícones centralizados com menor espaçamento entre eles */}
+      <View className="flex-row items-center justify-between w-full px-10">
+        <TouchableOpacity onPress={() => Linking.openURL('https://github.com/IgorFollador/educablog-web')}>
+          <Icon name="github" size={25} color="#FFF" />
         </TouchableOpacity>
-
-        {/* Ícones de redes sociais */}
-        <View className="flex flex-row items-center space-x-4">
-          <TouchableOpacity className="mr-4 hover:text-yellow-500" onPress={() => Linking.openURL('https://github.com/IgorFollador/educablog-web')}>
-            <Icon name="github" size={25} color="#FFF" />
-          </TouchableOpacity>
-          <TouchableOpacity className="mr-4 hover:text-yellow-500" onPress={() => Linking.openURL('mailto:fiap_grupo26@outlook.com')}>
-            <Icon name="envelope" size={25} color="#FFF" />
-          </TouchableOpacity>
-        </View>
-
+        <TouchableOpacity onPress={() => Linking.openURL('mailto:fiap_grupo26@outlook.com')}>
+          <Icon name="envelope" size={25} color="#FFF" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => Linking.openURL('mailto:fiap_grupo26@outlook.com')}>
+          <Icon name="plus" size={25} color="#FFF" />
+        </TouchableOpacity>
       </View>
-
-      <Text className="text-center text-white mt-4">
-        &copy; {currentYear} EducaBlog. Todos os direitos reservados.
-      </Text>
     </View>
   );
-};
+}
