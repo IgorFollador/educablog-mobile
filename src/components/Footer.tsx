@@ -23,7 +23,7 @@ export default function Footer() {
           <Icon name="envelope" size={25} color="#FFF" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => Linking.openURL('mailto:fiap_grupo26@outlook.com')}>
-          <Icon name="plus" size={25} color="#FFF" />
+            <Icon name="plus" size={25} color="#FFF" />
         </TouchableOpacity>
       </View>
     </View>

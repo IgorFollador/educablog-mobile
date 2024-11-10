@@ -1,34 +1,46 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
-export default function Navbar ({ isLoggedIn }) {
+interface NavBarProps {
+  isLoggedIn?: boolean;
+  canGoBack?: boolean;
+}
 
-  const [isOpen, setIsOpen] = useState(false);
+export default function Navbar({ isLoggedIn, canGoBack }: NavBarProps) {
   const navigation = useNavigation();
 
   const handleLogin = () => {
     Alert.alert('Login', 'Iniciar sessão.');
-    // Função de login - adicione lógica para autenticação aqui
+    // Adicione a lógica de autenticação aqui
   };
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Sessão encerrada.');
-    // Função de logout - adicione lógica para sair aqui
+    // Adicione a lógica para sair aqui
   };
 
   const handleRedirect = () => {
     if (isLoggedIn) {
       // Substitua pelo nome correto da tela Admin
     } else {
-      navigation.navigate('Home');  // Substitua pelo nome correto da tela inicial
+      navigation.navigate('Home'); // Substitua pelo nome correto da tela inicial
     }
   };
 
   return (
     <View className="bg-blue-950 pt-4 left-0 w-full shadow-md z-50">
       <View className="flex flex-row justify-between items-center p-5">
+        
+         {/* Voltar */}
+        {canGoBack ? (
+          <View onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={28} color="white" />
+          </View>
+        ) : (
+          <View style={{ width: 28 }} />
+        )}
 
         {/* Logo */}
         <TouchableOpacity className="flex-1 items-center" onPress={handleRedirect}>
@@ -41,39 +53,18 @@ export default function Navbar ({ isLoggedIn }) {
           </View>
         </TouchableOpacity>
 
-        {/* Botão de menu sanduíche */}
-        <TouchableOpacity onPress={() => setIsOpen(!isOpen)} className="p-2">
-          <Icon
-            name={isOpen ? 'close' : 'menu'}
-            size={30}
-            color="#FFF"
-          />
-        </TouchableOpacity>
+        {/* Botão Login/Logout */}
+        {isLoggedIn ? (
+          <TouchableOpacity onPress={handleLogout} className="p-2">
+            <Icon name="sign-out" size={25} color="#FFF" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={handleLogin} className="p-2">
+            <Icon name="user-circle" size={25} color="#FFF" />
+          </TouchableOpacity>
+        )}
+        
       </View>
-
-      {/* Menu de login/logout visível ao abrir o menu sanduíche */}
-      {isOpen && (
-        <View style={{
-          position: 'absolute',
-          top: '100%',
-          left: 0,
-          width: '100%',
-          backgroundColor: '#0a3a67', // Defina o mesmo tom de azul
-          zIndex: 50,
-          alignItems: 'center',
-          paddingVertical: 10
-        }}>
-          {isLoggedIn ? (
-            <TouchableOpacity onPress={handleLogout} style={{ paddingVertical: 10, width: '100%', alignItems: 'center' }}>
-              <Text style={{ color: '#FFF', fontSize: 18 }}>Logout</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={handleLogin} style={{ paddingVertical: 10, width: '100%', alignItems: 'center' }}>
-              <Text style={{ color: '#FFF', fontSize: 18 }}>Login</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
     </View>
   );
-};
+}
