@@ -15,7 +15,6 @@ type Post = {
   dataAtualizacao: string;
 };
 
-// Tipo ListItem agora trata postagens e cabeçalhos com 'key' e 'component'
 type ListItem = Post | { key: string; component: boolean };
 
 const HomePage = () => {
@@ -95,7 +94,7 @@ const HomePage = () => {
 
   return (
     <FlatList
-      data={[{ key: 'header', component: true }, ...posts]}  // Aqui você mistura postagens com um item de cabeçalho
+      data={[{ key: 'header', component: true }, ...posts]} 
       keyExtractor={(item, index) => (('key' in item) ? item.key : String(index))}  // Verifica se 'key' existe no item
       ListHeaderComponent={
         <View style={styles.headerContainer}>

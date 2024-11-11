@@ -1,9 +1,8 @@
-// Navbar.tsx
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, ActivityIndicator, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack'; // Importando StackNavigationProp
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
@@ -14,7 +13,7 @@ const Navbar = ({ showLoginButton }: NavbarProps) => {
   const { status, logout } = useAuth();
   const [loading, setLoading] = React.useState(false);
 
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>(); // Tipando o useNavigation
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute(); // Obtém o nome da tela atual
 
   const handleLogin = () => {
