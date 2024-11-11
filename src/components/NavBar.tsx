@@ -1,70 +1,129 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, TouchableOpacity, Image, ActivityIndicator, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { useNavigation, useRoute } from '@react-navigation/native'; // Adicionamos useRoute
+import { useAuth } from '../context/AuthContext';
 
-interface NavBarProps {
-  isLoggedIn?: boolean;
-  canGoBack?: boolean;
+interface NavbarProps {
+  showLoginButton: boolean; // Controla se o botão de login será exibido
 }
 
-export default function Navbar({ isLoggedIn, canGoBack }: NavBarProps) {
+const Navbar = ({ showLoginButton }: NavbarProps) => {
+  const { status, logout } = useAuth();
+  const [loading, setLoading] = React.useState(false);
   const navigation = useNavigation();
+  const route = useRoute(); // Obtém o nome da tela atual
 
+  // Navegação para a SignInPage
   const handleLogin = () => {
-    Alert.alert('Login', 'Iniciar sessão.');
-    // Adicione a lógica de autenticação aqui
+    navigation?.navigate('SignInPage');
   };
 
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Sessão encerrada.');
-    // Adicione a lógica para sair aqui
-  };
-
-  const handleRedirect = () => {
-    if (isLoggedIn) {
-      // Substitua pelo nome correto da tela Admin
-    } else {
-      navigation.navigate('Home'); // Substitua pelo nome correto da tela inicial
+  // Navegação para Logout
+  // Redireciona para a HomePage após logout
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      await logout(); 
+      navigation?.navigate('HomePage'); 
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
+
+  // Verifica se está na tela 'HomePage'
+  const isHome = route.name === 'HomePage'; 
+
   return (
-    <View className="bg-blue-950 pt-4 left-0 w-full shadow-md z-50">
-      <View className="flex flex-row justify-between items-center p-5">
-        
-         {/* Voltar */}
-        {canGoBack ? (
-          <View onPress={() => navigation.goBack()}>
-            <Icon name="arrow-back" size={28} color="white" />
-          </View>
-        ) : (
-          <View style={{ width: 28 }} />
+    <View style={styles.navbarContainer}>
+      <View style={styles.navbarContent}>
+
+        {/* Exibe o botão de voltar somente se não estiver na tela 'HomePage' */}
+        {!isHome && navigation.canGoBack() && (
+          <TouchableOpacity onPress={handleGoBack}>
+            <Icon name="arrow-left" size={28} color="white" />
+          </TouchableOpacity>
         )}
 
         {/* Logo */}
-        <TouchableOpacity className="flex-1 items-center" onPress={handleRedirect}>
-          <View className="flex flex-row items-center">
+        <TouchableOpacity style={styles.logoContainer} onPress={() => navigation?.navigate('HomePage')}>
+          <View style={styles.logoContent}>
             <Image
-              source={require('../../assets/images/logo.png')}  // Substitua pelo caminho correto do logo
-              style={{ width: 20, height: 20, marginRight: 8 }}
+              source={require('../../assets/images/logo.png')}
+              style={styles.logoImage}
             />
-            <Text className="text-white text-2xl">EducaBlog</Text>
+            <Text style={styles.logoText}>EducaBlog</Text>
           </View>
         </TouchableOpacity>
 
         {/* Botão Login/Logout */}
-        {isLoggedIn ? (
-          <TouchableOpacity onPress={handleLogout} className="p-2">
-            <Icon name="sign-out" size={25} color="#FFF" />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity onPress={handleLogin} className="p-2">
-            <Icon name="user-circle" size={25} color="#FFF" />
+        {showLoginButton && status !== 'authenticated' && ( 
+          // Só aparece o botão de login se showLoginButton for true e o usuário não estiver autenticado
+          <TouchableOpacity onPress={handleLogin} style={styles.iconButton}>
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFF" />
+            ) : (
+              <Icon name="user-circle" size={25} color="#FFF" />
+            )}
           </TouchableOpacity>
         )}
-        
+        {status === 'authenticated' && (
+          <TouchableOpacity onPress={handleLogout} style={styles.iconButton}>
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFF" />
+            ) : (
+              <Icon name="sign-out" size={25} color="#FFF" />
+            )}
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  navbarContainer: {
+    backgroundColor: '#003366',
+    paddingTop: 16,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    zIndex: 50,
+  },
+  navbarContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+  },
+  logoContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  logoContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logoImage: {
+    width: 20,
+    height: 20,
+    marginRight: 8,
+  },
+  logoText: {
+    color: '#FFFFFF',
+    fontSize: 24,
+  },
+  iconButton: {
+    padding: 8,
+  },
+});
+
+export default Navbar;
