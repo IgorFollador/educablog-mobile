@@ -35,28 +35,22 @@ const MainContent = () => {
   return (
     <View style={styles.container}>
       <Stack.Navigator
+        id={null}
         initialRouteName={status === 'authenticated' ? 'AdminPage' : 'HomePage'}
-        screenOptions={({ navigation, route }) => ({
+        screenOptions={({ route }) => ({
           header: () => {
-            // Esconde o botão de login na tela de login
-            const showLoginButton = route.name !== 'SignInPage'; 
-            return <Navbar navigation={navigation} showLoginButton={showLoginButton} />;
-          }
+            const showLoginButton = route.name !== 'SignInPage';
+            return <Navbar showLoginButton={showLoginButton} />;
+          },
         })}
       >
-        <Stack.Screen
-          name="HomePage"
-          component={HomePage}
-        />
+        <Stack.Screen name="HomePage" component={HomePage} />
         <Stack.Screen
           name="SignInPage"
           component={SignInPage}
           options={{ title: 'Login' }}
         />
-        <Stack.Screen
-          name="AdminPage"
-          component={AdminPage}
-        />
+        <Stack.Screen name="AdminPage" component={AdminPage} />
       </Stack.Navigator>
       <Footer />
     </View>

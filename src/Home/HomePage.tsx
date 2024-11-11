@@ -15,6 +15,9 @@ type Post = {
   dataAtualizacao: string;
 };
 
+// Tipo ListItem agora trata postagens e cabeçalhos com 'key' e 'component'
+type ListItem = Post | { key: string; component: boolean };
+
 const HomePage = () => {
   const [lastUpdate, setLastUpdate] = useState<string>(' --/--/---- --:--:--');
   const [posts, setPosts] = useState<Post[]>([]);
@@ -92,8 +95,8 @@ const HomePage = () => {
 
   return (
     <FlatList
-      data={[{ key: 'header', component: true }, ...posts]}
-      keyExtractor={(item, index) => item.key || String(index)}
+      data={[{ key: 'header', component: true }, ...posts]}  // Aqui você mistura postagens com um item de cabeçalho
+      keyExtractor={(item, index) => (('key' in item) ? item.key : String(index))}  // Verifica se 'key' existe no item
       ListHeaderComponent={
         <View style={styles.headerContainer}>
           <Text style={styles.title}>Postagens</Text>
@@ -108,8 +111,8 @@ const HomePage = () => {
           )}
         </View>
       }
-      renderItem={({ item }) => {
-        if (item.component) {
+      renderItem={({ item }: { item: ListItem }) => {
+        if ('component' in item && item.component) {  // Verifica se o item tem a propriedade 'component'
           return <View style={{ alignItems: 'center', marginHorizontal: 16 }}><PostList posts={posts} isLoading={loading} /></View>;
         }
         return null;

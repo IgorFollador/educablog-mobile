@@ -1,7 +1,9 @@
+// Navbar.tsx
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, ActivityIndicator, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useNavigation, useRoute } from '@react-navigation/native'; // Adicionamos useRoute
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack'; // Importando StackNavigationProp
 import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
@@ -11,21 +13,19 @@ interface NavbarProps {
 const Navbar = ({ showLoginButton }: NavbarProps) => {
   const { status, logout } = useAuth();
   const [loading, setLoading] = React.useState(false);
-  const navigation = useNavigation();
+
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>(); // Tipando o useNavigation
   const route = useRoute(); // Obtém o nome da tela atual
 
-  // Navegação para a SignInPage
   const handleLogin = () => {
-    navigation?.navigate('SignInPage');
+    navigation.navigate('SignInPage');
   };
 
-  // Navegação para Logout
-  // Redireciona para a HomePage após logout
   const handleLogout = async () => {
     try {
       setLoading(true);
-      await logout(); 
-      navigation?.navigate('HomePage'); 
+      await logout();
+      navigation.navigate('HomePage');
     } catch (error) {
       console.error(error);
     } finally {
@@ -37,34 +37,25 @@ const Navbar = ({ showLoginButton }: NavbarProps) => {
     navigation.goBack();
   };
 
-  // Verifica se está na tela 'HomePage'
-  const isHome = route.name === 'HomePage'; 
+  const isHome = route.name === 'HomePage';
 
   return (
     <View style={styles.navbarContainer}>
       <View style={styles.navbarContent}>
-
-        {/* Exibe o botão de voltar somente se não estiver na tela 'HomePage' */}
         {!isHome && navigation.canGoBack() && (
           <TouchableOpacity onPress={handleGoBack}>
             <Icon name="arrow-left" size={28} color="white" />
           </TouchableOpacity>
         )}
 
-        {/* Logo */}
-        <TouchableOpacity style={styles.logoContainer} onPress={() => navigation?.navigate('HomePage')}>
+        <TouchableOpacity style={styles.logoContainer} onPress={() => navigation.navigate('HomePage')}>
           <View style={styles.logoContent}>
-            <Image
-              source={require('../../assets/images/logo.png')}
-              style={styles.logoImage}
-            />
+            <Image source={require('../../assets/images/logo.png')} style={styles.logoImage} />
             <Text style={styles.logoText}>EducaBlog</Text>
           </View>
         </TouchableOpacity>
 
-        {/* Botão Login/Logout */}
-        {showLoginButton && status !== 'authenticated' && ( 
-          // Só aparece o botão de login se showLoginButton for true e o usuário não estiver autenticado
+        {showLoginButton && status !== 'authenticated' && (
           <TouchableOpacity onPress={handleLogin} style={styles.iconButton}>
             {loading ? (
               <ActivityIndicator size="small" color="#FFF" />

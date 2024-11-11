@@ -73,7 +73,7 @@ const PostList: React.FC<PostListProps> = ({
       keyExtractor={(item) => item.id}
       onEndReachedThreshold={0.5}
       showsVerticalScrollIndicator={false}
-      ListFooterComponent={isLoading ? <Text style={styles.loadingText}>Loading...</Text> : null}
+      ListFooterComponent={isLoading ? <Text style={styles.loadingText}>Carregando Postagens...</Text> : null}
       renderItem={({ item: post }) => (
         <TouchableOpacity
           onPress={() => handlePostClick(post.id)}

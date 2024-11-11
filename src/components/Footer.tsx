@@ -1,11 +1,14 @@
+// Footer.tsx
 import React from 'react';
-import { View, TouchableOpacity, Linking, Alert, StyleSheet, Text, ActivityIndicator } from 'react-native';
+import { View, TouchableOpacity, Linking, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack'; // Importando StackNavigationProp
 import { useAuth } from '../context/AuthContext';
 
+// Tipagem do componente
 const Footer = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>(); // Tipando o useNavigation
   const { status, initializing } = useAuth();
 
   // Exibe o indicador de carregamento da Inicialiazação
@@ -19,7 +22,7 @@ const Footer = () => {
 
   const handleNavigateToHome = async () => {
     try {
-      navigation.navigate('HomePage');
+      navigation.navigate('HomePage'); // Navegação tipada
     } catch (error) {
       console.error("Erro ao navegar:", error);
       Alert.alert('Erro de navegação', 'Não foi possível navegar para a página inicial.');
@@ -44,7 +47,7 @@ const Footer = () => {
   // Função para navegar para a página AdminPage
   const handleNavigateToAdminPage = () => {
     if (status === 'authenticated') {
-      navigation.navigate('AdminPage');
+      navigation.navigate('AdminPage'); // Navegação tipada
     }
   };
 
@@ -120,4 +123,3 @@ const styles = StyleSheet.create({
 });
 
 export default Footer;
-
