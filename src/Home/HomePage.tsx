@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Text, ActivityIndicator, FlatList, View, StyleSheet } from 'react-native';
 import axios from 'axios';
 import SearchBar from '../components/SearchBar';
 import PostList from '../components/PostList';
 import { formatDate } from '../services/Utils';
+import ScrollTopButton from '../components/ScrollToTopButton';
 
 type Post = {
   id: string;
@@ -24,6 +25,8 @@ const HomePage = () => {
   const [error, setError] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [isVisible, setIsVisible] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     fetchPosts();
@@ -92,33 +95,49 @@ const HomePage = () => {
     setCurrentPage(page);
   };
 
-  return (
-    <FlatList
-      data={[{ key: 'header', component: true }, ...posts]} 
-      keyExtractor={(item, index) => (('key' in item) ? item.key : String(index))}  // Verifica se 'key' existe no item
-      ListHeaderComponent={
-        <View style={styles.headerContainer}>
-          <Text style={styles.title}>Postagens</Text>
-          <Text style={styles.updateText}>Última atualização {lastUpdate}</Text>
-          <SearchBar onSearch={handleSearch} />
+  const handleScroll = (event: any) => {
+    const currentScrollPos = event.nativeEvent.contentOffset.y;
+    setIsVisible(currentScrollPos > 200); // Botão aparece após rolar 200px
+  };
 
-          {loading && (
-            <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
-          )}
-          {error && (
-            <Text style={styles.errorText}>{error}</Text>
-          )}
-        </View>
-      }
-      renderItem={({ item }: { item: ListItem }) => {
-        if ('component' in item && item.component) {  // Verifica se o item tem a propriedade 'component'
-          return <View style={{ alignItems: 'center', marginHorizontal: 16 }}><PostList posts={posts} isLoading={loading} /></View>;
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+      <FlatList
+        ref={flatListRef}
+        data={[{ key: 'header', component: true }, ...posts]}
+        keyExtractor={(item, index) => ('key' in item ? item.key : String(index))}
+        ListHeaderComponent={
+          <View style={styles.headerContainer}>
+            <Text style={styles.title}>Postagens</Text>
+            <Text style={styles.updateText}>Última atualização {lastUpdate}</Text>
+            <SearchBar onSearch={handleSearch} />
+            {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />}
+            {error && <Text style={styles.errorText}>{error}</Text>}
+          </View>
         }
-        return null;
-      }}
-      ListFooterComponent={<View style={{ height: 60 }} />}
-      showsVerticalScrollIndicator={false}
-    />
+        renderItem={({ item }: { item: ListItem }) => {
+          if ('component' in item && item.component) {
+            return (
+              <View style={{ alignItems: 'center', marginHorizontal: 16 }}>
+                <PostList posts={posts} isLoading={loading} />
+              </View>
+            );
+          }
+          return null;
+        }}
+        ListFooterComponent={<View style={{ height: 60 }} />}
+        showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      />
+
+      {/* Botão de rolar para o topo */}
+      <ScrollTopButton isVisible={isVisible} scrollToTop={scrollToTop} />
+    </View>
   );
 };
 
