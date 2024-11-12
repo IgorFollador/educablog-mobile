@@ -1,15 +1,15 @@
-import React from 'react';
-import { View, TouchableOpacity, Linking, Alert, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, TouchableOpacity, Modal, Text, StyleSheet, Linking, Alert, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack'; 
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../context/AuthContext';
 
 const Footer = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { status, initializing } = useAuth();
+  const [showActionsDrawer, setShowActionsDrawer] = useState(false); // Estado para controlar o modal de ações
 
-  // Exibe o indicador de carregamento da Inicialiazação
   if (initializing) {
     return (
       <View style={styles.loadingContainer}>
@@ -18,16 +18,19 @@ const Footer = () => {
     );
   }
 
-  const handleNavigateToHome = async () => {
+  const handleNavigateToHome = () => {
     try {
-      navigation.navigate('HomePage');
+      if (status === 'authenticated') {
+        navigation.navigate('AdminPage'); // Navega para a página de administração
+      } else {
+        navigation.navigate('HomePage'); // Navega para a página inicial
+      }
     } catch (error) {
       console.error("Erro ao navegar:", error);
       Alert.alert('Erro de navegação', 'Não foi possível navegar para a página inicial.');
     }
   };
 
-  // Função para verificar erros de abertura de links
   const handleLinking = async (url: string) => {
     try {
       const supported = await Linking.canOpenURL(url);
@@ -42,18 +45,20 @@ const Footer = () => {
     }
   };
 
-  // Função para navegar para a página AdminPage
-  const handleNavigateToAdminPage = () => {
+  const handlePlusClick = () => {
     if (status === 'authenticated') {
-      navigation.navigate('AdminPage');
+      setShowActionsDrawer(true);
     }
   };
 
-  // Função para navegar para a página de criação de conteúdo
-  const handlePlusClick = () => {
-    if (status === 'authenticated') {
-      console.log('Adicionar novo conteúdo');
-    }
+  const handleNavigateToCreatePostPage = () => {
+    setShowActionsDrawer(false); // Fecha o drawer
+    navigation.navigate('CreatePostPage'); // Navega para a página de criação de post
+  };
+
+  const handleNavigateToCreateUserPage = () => {
+    setShowActionsDrawer(false); // Fecha o drawer
+    navigation.navigate('CreateUserPage'); // Navega para a página de criação de post
   };
 
   return (
@@ -69,20 +74,35 @@ const Footer = () => {
           <Icon name="envelope" size={25} color="#FFF" />
         </TouchableOpacity>
 
-        {/* Botão Plus, visível somente se o usuário estiver logado */}
         {status === 'authenticated' && (
           <TouchableOpacity onPress={handlePlusClick}>
             <Icon name="plus" size={25} color="#FFF" />
           </TouchableOpacity>
         )}
-
-        {/* Botão Edit, visível somente se o usuário estiver logado */}
-        {status === 'authenticated' && (
-          <TouchableOpacity onPress={handleNavigateToAdminPage}>
-            <Icon name="pencil" size={25} color="#FFF" />
-          </TouchableOpacity>
-        )}
       </View>
+
+      <Modal
+        visible={showActionsDrawer}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowActionsDrawer(false)}
+      >
+        <View style={styles.drawerContainer}>
+          <View style={styles.drawerContent}>
+            <TouchableOpacity onPress={handleNavigateToCreatePostPage} style={styles.drawerItem}>
+              <Icon name="file-text" style={styles.icon} />
+              <Text style={styles.drawerItemText}>Adicionar Post</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleNavigateToCreateUserPage} style={styles.drawerItem}>
+              <Icon name="user-plus" style={styles.icon} />
+              <Text style={styles.drawerItemText}>Adicionar Usuário</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setShowActionsDrawer(false)} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -107,10 +127,39 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 40,
   },
-  iconText: {
-    color: '#FFF',
-    fontSize: 12,
-    marginTop: 4, 
+  drawerContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  drawerContent: {
+    backgroundColor: '#FFF',
+    padding: 20,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  drawerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  drawerItemText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#333',
+  },
+  closeButton: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#003366',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  icon: {
+    color: '#003366',
+    fontSize: 24,
   },
   loadingContainer: {
     flex: 1,

@@ -8,6 +8,9 @@ import AdminPage from './src/admin/AdminPage';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import HomePage from './src/Home/HomePage';
 import Footer from './src/components/Footer';
+import CreatePostPage from './src/admin/posts/create/CreatePostPage';
+import CreateUserPage from './src/admin/users/create/CreateUserPage';
+import EditPostPage from './src/admin/posts/edit/EditPostPage';
 
 const Stack = createStackNavigator();
 
@@ -22,9 +25,9 @@ export default function App() {
 }
 
 const MainContent = () => {
-  const { status } = useAuth();
+  const { status, initializing } = useAuth(); // Incluindo "initializing" para o estado de carregamento
 
-  if (status === 'loading') {
+  if (initializing) {
     return (
       <View style={styles.loadingContainer}>
         <Text>Loading...</Text>
@@ -35,7 +38,6 @@ const MainContent = () => {
   return (
     <View style={styles.container}>
       <Stack.Navigator
-        id={null}
         initialRouteName={status === 'authenticated' ? 'AdminPage' : 'HomePage'}
         screenOptions={({ route }) => ({
           header: () => {
@@ -51,6 +53,9 @@ const MainContent = () => {
           options={{ title: 'Login' }}
         />
         <Stack.Screen name="AdminPage" component={AdminPage} />
+        <Stack.Screen name="CreatePostPage" component={CreatePostPage} />
+        <Stack.Screen name="CreateUserPage" component={CreateUserPage} />
+        <Stack.Screen name="EditPostPage" component={EditPostPage} />
       </Stack.Navigator>
       <Footer />
     </View>
