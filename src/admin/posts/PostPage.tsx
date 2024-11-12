@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Image, Text, TextInput, View, ScrollView, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native';
+import { Image, Text, TextInput, View, ScrollView, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, NavigationProp, RouteProp } from '@react-navigation/native';
 import { z } from 'zod';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Picker } from '@react-native-picker/picker';  // Importação correta
+import { Picker } from '@react-native-picker/picker';
 
-// Defina seu esquema de validação usando Zod
+
+type PostPageNavigationProp = NavigationProp<RootStackParamList, 'PostPage'>;
+type PostPageRouteProp = RouteProp<RootStackParamList, 'PostPage'>;
+
 const postSchema = z.object({
   titulo: z.string().min(3, 'O título é obrigatório e deve conter no mínimo 3 caracteres'),
   descricao: z.string().min(1, 'A descrição é obrigatória'),
@@ -18,20 +21,21 @@ const postSchema = z.object({
   }),
 });
 
-const CreatePostPage = () => {
-  const navigation = useNavigation();
+const PostPage = () => {
+  const navigation = useNavigation<PostPageNavigationProp>();
+  const { params } = useRoute<PostPageRouteProp>();
+  const postId = params?.postId;
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [categoryName, setCategoryName] = useState('');
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
   const [isActive, setIsActive] = useState(false);
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Verifica o token e redireciona se não autenticado
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem('userToken');
@@ -61,6 +65,33 @@ const CreatePostPage = () => {
     fetchCategories();
   }, []);
 
+  useEffect(() => {
+    if (postId) {
+      const fetchPost = async () => {
+        try {
+          const token = await AsyncStorage.getItem('userToken');
+          if (!token) return;
+          
+          const response = await axios.get(`${process.env.PUBLIC_API_URL}/posts/${postId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          const post = response.data;
+          setTitle(post.titulo);
+          setDescription(post.descricao);
+          setImageUrl(post.imagemUrl || '');
+          setSelectedCategoryId(post.categoria?.id || null);
+          setCategoryName(post.categoria?.nome || '');
+          setIsActive(post.ativo);
+        } catch (err) {
+          console.error('Erro ao carregar a postagem:', err);
+          setError('Erro ao carregar a postagem.');
+        }
+      };
+      fetchPost();
+    }
+  }, [postId]);
+
   const handleCategoryChange = (itemValue: string) => {
     setSelectedCategoryId(itemValue);
     const selectedCategory = categories.find((category) => category.id === itemValue);
@@ -79,7 +110,6 @@ const CreatePostPage = () => {
       categoria: { id: selectedCategoryId, nome: categoryName.trim() },
     };
 
-    // Validação com Zod
     const validation = postSchema.safeParse(postData);
 
     if (!validation.success) {
@@ -91,18 +121,26 @@ const CreatePostPage = () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
       if (!token) {
-        setError('Você precisa estar autenticado para criar uma postagem.');
+        setError('Você precisa estar autenticado para criar ou editar uma postagem.');
         setLoading(false);
         return;
       }
-      
-      await axios.post(`${process.env.PUBLIC_API_URL}/posts`, validation.data, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+
+      if (postId) {
+        // Editar post existente
+        await axios.put(`${process.env.PUBLIC_API_URL}/posts/${postId}`, validation.data, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        // Criar novo post
+        await axios.post(`${process.env.PUBLIC_API_URL}/posts`, validation.data, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
       navigation.navigate('AdminPage');
     } catch (err) {
-      console.error('Erro ao criar postagem:', err);
-      setError('Erro ao criar postagem. Verifique sua conexão e tente novamente.');
+      console.error('Erro ao salvar postagem:', err);
+      setError('Erro ao salvar postagem. Verifique sua conexão e tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -111,7 +149,7 @@ const CreatePostPage = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.form}>
-        <Text style={styles.title}>Criar Nova Postagem</Text>
+        <Text style={styles.title}>{postId ? 'Editar Postagem' : 'Criar Nova Postagem'}</Text>
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <TextInput
@@ -143,24 +181,21 @@ const CreatePostPage = () => {
         />
         {imageUrl ? <Image source={{ uri: imageUrl }} style={styles.imagePreview} /> : null}
 
-        {/* Seletor de categoria */}
         <View style={[styles.pickerContainer, focusedField === 'categoria' && styles.focusedInput]}>
           <Picker
             selectedValue={selectedCategoryId}
             onValueChange={handleCategoryChange}
             style={styles.picker}
           >
-            <Picker.Item label="Selecione uma categoria" value="" />
+            <Picker.Item label="Selecione uma categoria" style={styles.pickerLabelItem} value="" />
             {categories.map((category) => (
-              <Picker.Item key={category.id} label={category.name} value={category.id} />
+              <Picker.Item style={styles.pickerItem} key={category.id} label={category.name} value={category.id} />
             ))}
           </Picker>
         </View>
 
         <TouchableOpacity onPress={() => setIsActive(!isActive)} style={styles.toggleContainer}>
-          <View style={[styles.toggle, { backgroundColor: isActive ? '#34D399' : '#E5E7EB' }]}>
-            <View style={styles.toggleButton} />
-          </View>
+          <View style={[styles.toggle, { backgroundColor: isActive ? '#34D399' : '#E5E7EB' }]} />
           <Text style={styles.toggleText}>{isActive ? 'Ativo' : 'Inativo'}</Text>
         </TouchableOpacity>
 
@@ -180,7 +215,9 @@ const CreatePostPage = () => {
             <Text style={styles.buttonText}>Cancelar</Text>
           </TouchableOpacity>
         </View>
+
       </View>
+      <View style={styles.spaceBelow}></View>
     </ScrollView>
   );
 };
@@ -253,25 +290,29 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   buttonContainer: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
   },
   button: {
-    padding: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    marginBottom: 10,
     borderRadius: 8,
     alignItems: 'center',
-    width: '48%',
+    justifyContent: 'center',
+    flex: 1, 
+    marginHorizontal: 5,
   },
   submitButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: '#28a745', 
   },
   cancelButton: {
     backgroundColor: '#dc3545',
   },
   buttonText: {
     color: '#fff',
-    textAlign: 'center',
     fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   pickerContainer: {
     borderWidth: 1,
@@ -284,6 +325,15 @@ const styles = StyleSheet.create({
     height: 50, 
     fontSize: 16,
   },
+  spaceBelow: {
+    height: 70,
+  },
+  pickerLabelItem: {
+    color: '#898989',
+  },
+  pickerItem: {
+    color: '#000',
+  }
 });
 
-export default CreatePostPage;
+export default PostPage;

@@ -135,8 +135,8 @@ const HomePage = () => {
         scrollEventThrottle={16}
       />
 
-      {/* Botão de rolar para o topo */}
       <ScrollTopButton isVisible={isVisible} scrollToTop={scrollToTop} />
+      
     </View>
   );
 };

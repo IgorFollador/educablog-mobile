@@ -4,6 +4,8 @@ declare global {
       HomePage: undefined;    
       SignInPage: undefined;    
       AdminPage: undefined;    
+      PostPage: { postId: string | undefined };
+      CreateUserPage: undefined;
     };
   }
   

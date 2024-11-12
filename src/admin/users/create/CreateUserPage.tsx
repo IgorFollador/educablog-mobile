@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import axios from 'axios';
 import { z } from 'zod';
 
@@ -14,7 +14,8 @@ const CreateUserPage: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  const navigation = useNavigation();
+
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const userSchema = z.object({
     email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
@@ -44,7 +45,7 @@ const CreateUserPage: React.FC = () => {
 
   const formatDate = (date: string) => {
     let value = date.replace(/\D/g, '');
-  
+
     if (value.length <= 2) {
       value = value.replace(/(\d{2})/, '$1');
     } else if (value.length <= 4) {
@@ -52,7 +53,7 @@ const CreateUserPage: React.FC = () => {
     } else {
       value = value.replace(/(\d{2})(\d{2})(\d{4})/, '$1/$2/$3');
     }
-  
+
     return value;
   };
 
@@ -62,7 +63,6 @@ const CreateUserPage: React.FC = () => {
 
   const cleanCPF = (cpf: string) => cpf.replace(/\D/g, '');
   const cleanPhone = (phone: string) => phone.replace(/\D/g, '');
-  const cleanDate = (date: string) => date.replace(/\D/g, '');
 
   const formatDateToAPI = (date: string) => {
     if (!date) return '';
@@ -229,17 +229,15 @@ const CreateUserPage: React.FC = () => {
             onPress={handleRegister}
             disabled={loading}
           >
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Registrar</Text>}
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Cadastrar</Text>}
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.button, styles.cancelButton]}
-            onPress={handleCancel}
-          >
+          <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={handleCancel}>
             <Text style={styles.buttonText}>Cancelar</Text>
           </TouchableOpacity>
         </View>
       </View>
+      <View style={styles.spaceBelow}></View>
     </View>
   );
 };
@@ -247,43 +245,42 @@ const CreateUserPage: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
+    justifyContent: 'center',
   },
   form: {
-    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
     textAlign: 'center',
+    marginBottom: 20,
   },
   input: {
+    height: 50,
+    borderColor: '#ccc',
     borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 12,
-    marginBottom: 10,
-    borderRadius: 8,
-    fontSize: 16,
+    borderRadius: 5,
+    marginBottom: 15,
+    paddingLeft: 10,
   },
   focusedInput: {
-    borderColor: '#007bff',
-    borderWidth: 1.5,
+    borderColor: '#3498db',
   },
   errorText: {
     color: 'red',
-    fontSize: 14,
     marginBottom: 10,
     textAlign: 'center',
   },
   buttonContainer: {
-    marginTop: 20,
+    marginTop: 5,
   },
   button: {
-    padding: 14,
-    borderRadius: 8,
+    padding: 15,
+    borderRadius: 5,
     marginBottom: 10,
   },
   registerButton: {
@@ -296,6 +293,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     fontSize: 16,
+  },
+  spaceBelow: {
+    height: 70,
   },
 });
 

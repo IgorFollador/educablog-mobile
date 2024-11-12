@@ -1,12 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Alert, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, StyleSheet, Alert, ActivityIndicator, FlatList } from 'react-native';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import PostList from '../components/PostList';
 import Pagination from '../components/Pagination';
 import SearchBar from '../components/SearchBar';
-import Icon from 'react-native-vector-icons/FontAwesome';
 
 type Post = {
   id: string;
@@ -27,12 +26,12 @@ const AdminPage = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
-  const [showActionsDrawer, setShowActionsDrawer] = useState<boolean>(false); // Estado para controlar o drawer de ações
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const navigation = useNavigation();
+
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const fetchPosts = useCallback(async (page: number, query: string = '') => {
     setLoading(true);
@@ -71,7 +70,7 @@ const AdminPage = () => {
   }, [session, status, currentPage, searchQuery, fetchPosts]);
 
   const handleEdit = (postId: string) => {
-    navigation.navigate('EditPostPage', { postId });
+    navigation.navigate('PostPage', { postId });
   };
 
   const handleDelete = (postId: string) => {
@@ -108,48 +107,42 @@ const AdminPage = () => {
     setSearchQuery(query);
   };
 
-  return (
-    <View style={{ flex: 1, padding: 16 }}>
-
-      <Text style={styles.title}>Administração de Postagens</Text>
-      <SearchBar onSearch={handleSearch} />
-
-      {error && <Text style={styles.errorText}>{error}</Text>}
-
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <>
-          <PostList posts={posts} isLoading={loading} isAdmin onEdit={handleEdit} onDelete={handleDelete} />
-          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-        </>
-      )}
-
-      {/* Modal para o Drawer de Ações Administrativas */}
-      <Modal
-        visible={showActionsDrawer}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowActionsDrawer(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.drawerTitle}>Ações Administrativas</Text>
-            <TouchableOpacity style={styles.drawerItem} onPress={() => navigation.navigate('CreatePostPage')}>
-              <Icon name="file-text" style={styles.icon} />
-              <Text style={styles.drawerItemText}>ADICIONAR POST</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.drawerItem} onPress={() => navigation.navigate('CreateUserPage')}>
-              <Icon name="user-plus" style={styles.icon} />
-              <Text style={styles.drawerItemText}>ADICIONAR USUÁRIO</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setShowActionsDrawer(false)} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Fechar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+  const renderItem = ({ item }: { item: Post }) => (
+    <View style={{ alignItems: 'center', marginHorizontal: 16 }}>
+      <PostList
+        posts={[item]}
+        isLoading={loading}
+        isAdmin
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
     </View>
+  );
+
+  return (
+    <FlatList
+      data={[...posts]}
+      keyExtractor={(item) => item.id}
+      renderItem={renderItem}
+      ListHeaderComponent={
+        <View style={{ padding: 16 }}>
+          <Text style={styles.title}>Administração de Postagens</Text>
+          <SearchBar onSearch={handleSearch} />
+          {error && <Text style={styles.errorText}>{error}</Text>}
+          {loading && <ActivityIndicator size="large" color="#0000ff" />}
+        </View>
+      }
+      ListFooterComponent={
+        <>
+          {!loading && (
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+          )}
+        </>
+      }
+      ListEmptyComponent={
+        !loading && !posts.length ? <Text style={styles.errorText}>Nenhum post encontrado</Text> : null
+      }
+    />
   );
 };
 

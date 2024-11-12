@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 const Footer = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { status, initializing } = useAuth();
-  const [showActionsDrawer, setShowActionsDrawer] = useState(false); // Estado para controlar o modal de ações
+  const [showActionsDrawer, setShowActionsDrawer] = useState(false);
 
   if (initializing) {
     return (
@@ -21,9 +21,9 @@ const Footer = () => {
   const handleNavigateToHome = () => {
     try {
       if (status === 'authenticated') {
-        navigation.navigate('AdminPage'); // Navega para a página de administração
+        navigation.navigate('AdminPage');
       } else {
-        navigation.navigate('HomePage'); // Navega para a página inicial
+        navigation.navigate('HomePage');
       }
     } catch (error) {
       console.error("Erro ao navegar:", error);
@@ -51,14 +51,14 @@ const Footer = () => {
     }
   };
 
-  const handleNavigateToCreatePostPage = () => {
+  const handleNavigateToPostPage = () => {
     setShowActionsDrawer(false); // Fecha o drawer
-    navigation.navigate('CreatePostPage'); // Navega para a página de criação de post
+    navigation.navigate('PostPage'); 
   };
 
   const handleNavigateToCreateUserPage = () => {
     setShowActionsDrawer(false); // Fecha o drawer
-    navigation.navigate('CreateUserPage'); // Navega para a página de criação de post
+    navigation.navigate('CreateUserPage');
   };
 
   return (
@@ -89,7 +89,7 @@ const Footer = () => {
       >
         <View style={styles.drawerContainer}>
           <View style={styles.drawerContent}>
-            <TouchableOpacity onPress={handleNavigateToCreatePostPage} style={styles.drawerItem}>
+            <TouchableOpacity onPress={handleNavigateToPostPage} style={styles.drawerItem}>
               <Icon name="file-text" style={styles.icon} />
               <Text style={styles.drawerItemText}>Adicionar Post</Text>
             </TouchableOpacity>

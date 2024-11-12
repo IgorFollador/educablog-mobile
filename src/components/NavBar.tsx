@@ -37,7 +37,7 @@ const Navbar = ({ showLoginButton }: NavbarProps) => {
   };
 
   const isHome = route.name === 'HomePage';
-  const isCreatePostPage = route.name === 'CreatePostPage';
+  const isPostPage = route.name === 'PostPage';
   const isCreateUserPage = route.name === 'CreateUserPage'; 
   const isAuthenticated = status === 'authenticated'; // Verifica se o usuário está autenticado
 
@@ -45,7 +45,7 @@ const Navbar = ({ showLoginButton }: NavbarProps) => {
     <View style={styles.navbarContainer}>
       <View style={styles.navbarContent}>
         {/* Exibe o botão voltar */}
-        {(isCreateUserPage ||isCreatePostPage || (navigation.canGoBack() && !isHome && !isAuthenticated)) && (
+        {(isCreateUserPage ||isPostPage || (navigation.canGoBack() && !isHome && !isAuthenticated)) && (
           <TouchableOpacity onPress={handleGoBack}>
             <Icon name="arrow-left" size={28} color="white" />
           </TouchableOpacity>
