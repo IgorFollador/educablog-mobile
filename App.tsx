@@ -10,6 +10,7 @@ import Footer from './src/components/Footer';
 import PostPage from './src/admin/posts/PostPage';
 import CreateUserPage from './src/admin/users/create/CreateUserPage';
 import { createStackNavigator } from '@react-navigation/stack';
+import ViewPostPage from './src/posts/[id]/ViewPostPage';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -51,6 +52,7 @@ const MainContent = () => {
         <Stack.Screen name="AdminPage" component={AdminPage} />
         <Stack.Screen name="PostPage" component={PostPage}/>
         <Stack.Screen name="CreateUserPage" component={CreateUserPage} />
+        <Stack.Screen name="ViewPostPage" component={ViewPostPage} />
       </Stack.Navigator>
       <Footer />
     </View>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Text, TouchableOpacity, View, Image, FlatList, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 type Post = {
   id: string;
@@ -40,10 +40,11 @@ const PostList: React.FC<PostListProps> = ({
   onDelete,
 }) => {
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const handlePostClick = (postId: string) => {
     console.log('Clicou no post:', postId);
+    navigation.navigate('ViewPostPage', { id: postId });
   };
 
   const removeHtmlTags = (description: string) => {
