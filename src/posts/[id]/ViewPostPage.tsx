@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingBottom: 80, // Adiciona um padding extra para que o botão "Voltar" fique visível e não sobreponha o footer
+    paddingBottom: 80,
     backgroundColor: '#f5f5f5',
   },
   loadingContainer: {
