@@ -20,10 +20,6 @@
         "backgroundColor": "#ffffff"
       },
       "package": "educablog.mobile"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png",
-      "bundler": "metro"
     }
   }
 }
