@@ -12,7 +12,7 @@ interface Post {
   usuarioCriacao?: { pessoa?: { nome: string } };
 }
 
-const ViewPostPage: React.FC = () => {
+const ViewPostPage = () => {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');

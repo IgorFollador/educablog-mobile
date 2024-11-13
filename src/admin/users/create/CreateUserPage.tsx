@@ -4,7 +4,7 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import axios from 'axios';
 import { z } from 'zod';
 
-const CreateUserPage: React.FC = () => {
+const CreateUserPage = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [name, setName] = useState<string>('');
