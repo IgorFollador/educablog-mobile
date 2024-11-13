@@ -7,6 +7,7 @@ declare global {
       PostPage: { postId: string | undefined };
       CreateUserPage: undefined;
       ViewPostPage: { id: string };
+      UserManagementPage: undefined; 
     };
   }
   

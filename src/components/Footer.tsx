@@ -52,13 +52,18 @@ const Footer = () => {
   };
 
   const handleNavigateToPostPage = () => {
-    setShowActionsDrawer(false); // Fecha o drawer
+    setShowActionsDrawer(false);
     navigation.navigate('PostPage'); 
   };
 
   const handleNavigateToCreateUserPage = () => {
-    setShowActionsDrawer(false); // Fecha o drawer
+    setShowActionsDrawer(false); 
     navigation.navigate('CreateUserPage');
+  };
+
+  const handleNavigateToUserManagementPage = () => {
+    setShowActionsDrawer(false); 
+    navigation.navigate('UserManagementPage');
   };
 
   return (
@@ -76,7 +81,7 @@ const Footer = () => {
 
         {status === 'authenticated' && (
           <TouchableOpacity onPress={handlePlusClick}>
-            <Icon name="plus" size={25} color="#FFF" />
+            <Icon name="pencil" size={25} color="#FFF" />
           </TouchableOpacity>
         )}
       </View>
@@ -96,6 +101,10 @@ const Footer = () => {
             <TouchableOpacity onPress={handleNavigateToCreateUserPage} style={styles.drawerItem}>
               <Icon name="user-plus" style={styles.icon} />
               <Text style={styles.drawerItemText}>Adicionar Usuário</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleNavigateToUserManagementPage} style={styles.drawerItem}>
+              <Icon name="users" style={styles.icon} />
+              <Text style={styles.drawerItemText}>Gerenciar Usuários</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setShowActionsDrawer(false)} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>Fechar</Text>
