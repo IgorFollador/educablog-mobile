@@ -1,12 +1,15 @@
 import axios from 'axios';
+import Constants from 'expo-constants';
 
 export const signIn = async (email: string, password: string) => {
   try {
+    const apiUrl = Constants.expoConfig.extra.PUBLIC_API_URL;
+
     console.log('Iniciando autenticação...');
     console.log('email:', email);
     console.log('password:', password);
 
-    const response = await axios.post(`${process.env.PUBLIC_API_URL}/autenticacao/signin`, {
+    const response = await axios.post(`${apiUrl}/autenticacao/signin`, {
       login: email,
       senha: password,
     });

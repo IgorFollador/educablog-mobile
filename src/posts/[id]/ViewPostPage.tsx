@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
 import axios from 'axios';
@@ -19,6 +20,8 @@ const ViewPostPage = () => {
   const route = useRoute();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { id } = route.params as { id: string };
+  const apiUrl = Constants.expoConfig.extra.PUBLIC_API_URL;
+
 
   useEffect(() => {
     fetchPostData();
@@ -26,7 +29,8 @@ const ViewPostPage = () => {
 
   const fetchPostData = async () => {
     try {
-      const response = await axios.get(`${process.env.PUBLIC_API_URL}/posts/${id}`);
+      
+      const response = await axios.get(`${apiUrl}/posts/${id}`);
       setPost(response.data);
     } catch (err) {
       setError('Erro ao carregar dados da postagem.');

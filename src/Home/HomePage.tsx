@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import React, { useState, useEffect, useRef } from 'react';
 import { Text, ActivityIndicator, FlatList, View, StyleSheet } from 'react-native';
 import axios from 'axios';
@@ -33,8 +34,8 @@ const HomePage = () => {
   }, [currentPage]);
 
   const fetchPosts = async (query = '') => {
-    const apiUrl = process.env.PUBLIC_API_URL;
-    const postsLimit = process.env.POSTS_LIMIT || '10';
+    const apiUrl = Constants.expoConfig.extra.PUBLIC_API_URL;
+    const postsLimit = Constants.expoConfig.extra.PUBLIC_POSTS_LIMIT || '10';
 
     if (!apiUrl) {
       setError('A URL da API não está definida corretamente. Verifique as variáveis de ambiente.');
