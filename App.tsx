@@ -3,12 +3,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import { View, Text, StyleSheet } from 'react-native';
 import Navbar from './src/components/NavBar';
 import SignInPage from './src/auth/signin/SignInPage';
-import AdminPage from './src/admin/AdminPage';
+import PostManagementPage from './src/admin/posts/PostManagementPage';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import HomePage from './src/Home/HomePage';
 import Footer from './src/components/Footer';
 import PostPage from './src/admin/posts/PostPage';
-import CreateUserPage from './src/admin/users/create/CreateUserPage';
+import UserPage from './src/admin/users/UserPage';
 import { createStackNavigator } from '@react-navigation/stack';
 import ViewPostPage from './src/posts/[id]/ViewPostPage';
 import UserManagementPage from './src/admin/users/UserManagementPage';
@@ -40,7 +40,7 @@ const MainContent = () => {
     <View style={styles.container}>
       <Stack.Navigator
         id={undefined}
-        initialRouteName={status === 'authenticated' ? 'AdminPage' : 'HomePage'}
+        initialRouteName={status === 'authenticated' ? 'PostManagementPage' : 'HomePage'}
         screenOptions={({ route }) => ({
           header: () => {
             const showLoginButton = route.name !== 'SignInPage';
@@ -50,9 +50,9 @@ const MainContent = () => {
       >
         <Stack.Screen name="HomePage" component={HomePage} />
         <Stack.Screen name="SignInPage" component={SignInPage}/>
-        <Stack.Screen name="AdminPage" component={AdminPage} />
+        <Stack.Screen name="PostManagementPage" component={PostManagementPage} />
         <Stack.Screen name="PostPage" component={PostPage}/>
-        <Stack.Screen name="CreateUserPage" component={CreateUserPage} />
+        <Stack.Screen name="UserPage" component={UserPage} />
         <Stack.Screen name="ViewPostPage" component={ViewPostPage} />
         <Stack.Screen name="UserManagementPage" component={UserManagementPage} />
       </Stack.Navigator>

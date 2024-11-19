@@ -7,7 +7,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 type RootStackParamList = {
   HomePage: undefined;
   SignInPage: undefined;
-  AdminPage: undefined;
+  PostManagementPage: undefined;
 };
 
 type SignInPageNavigationProp = StackNavigationProp<RootStackParamList, 'SignInPage'>;
@@ -20,11 +20,11 @@ const SignInPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const navigation = useNavigation<SignInPageNavigationProp>();
 
-  // Verifica se o status de autenticação mudou e navega para a AdminPage
-  // Quando o status mudar, navegar para AdminPage
+  // Verifica se o status de autenticação mudou e navega para a PostManagementPage
+  // Quando o status mudar, navegar para PostManagementPage
   useEffect(() => {
     if (status === 'authenticated') {
-      navigation.replace('AdminPage');
+      navigation.replace('PostManagementPage');
     }
   }, [status, navigation]); 
 

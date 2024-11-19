@@ -21,7 +21,7 @@ const Footer = () => {
   const handleNavigateToHome = () => {
     try {
       if (status === 'authenticated') {
-        navigation.navigate('AdminPage');
+        navigation.navigate('PostManagementPage');
       } else {
         navigation.navigate('HomePage');
       }
@@ -56,9 +56,9 @@ const Footer = () => {
     navigation.navigate('PostPage'); 
   };
 
-  const handleNavigateToCreateUserPage = () => {
+  const handleNavigateToUserPage = () => {
     setShowActionsDrawer(false); 
-    navigation.navigate('CreateUserPage');
+    navigation.navigate('UserPage');
   };
 
   const handleNavigateToUserManagementPage = () => {
@@ -98,7 +98,7 @@ const Footer = () => {
               <Icon name="file-text" style={styles.icon} />
               <Text style={styles.drawerItemText}>Adicionar Post</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleNavigateToCreateUserPage} style={styles.drawerItem}>
+            <TouchableOpacity onPress={handleNavigateToUserPage} style={styles.drawerItem}>
               <Icon name="user-plus" style={styles.icon} />
               <Text style={styles.drawerItemText}>Adicionar Usuário</Text>
             </TouchableOpacity>

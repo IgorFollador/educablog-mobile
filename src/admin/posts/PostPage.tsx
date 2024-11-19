@@ -137,7 +137,7 @@ const PostPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
-      navigation.navigate('AdminPage');
+      navigation.navigate('PostManagementPage');
     } catch (err) {
       console.error('Erro ao salvar postagem:', err);
       setError('Erro ao salvar postagem. Verifique sua conexão e tente novamente.');
@@ -210,7 +210,7 @@ const PostPage = () => {
 
           <TouchableOpacity
             style={[styles.button, styles.cancelButton]}
-            onPress={() => navigation.navigate('AdminPage')}
+            onPress={() => navigation.navigate('PostManagementPage')}
           >
             <Text style={styles.buttonText}>Cancelar</Text>
           </TouchableOpacity>
