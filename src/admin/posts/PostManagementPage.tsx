@@ -2,10 +2,10 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator, FlatList } from 'react-native';
 import axios from 'axios';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { useAuth } from '../context/AuthContext';
-import PostList from '../components/PostList';
-import Pagination from '../components/Pagination';
-import SearchBar from '../components/SearchBar';
+import { useAuth } from '../../context/AuthContext';
+import PostList from '../../components/PostList';
+import Pagination from '../../components/Pagination';
+import SearchBar from '../../components/SearchBar';
 
 type Post = {
   id: string;
@@ -21,7 +21,7 @@ type Post = {
   };
 };
 
-const AdminPage = () => {
+const PostManagementPage = () => {
   const { data: session, status } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -88,7 +88,8 @@ const AdminPage = () => {
   const confirmDelete = async () => {
     if (selectedPostId) {
       try {
-        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/posts/${selectedPostId}`, {
+        console.log('Excluindo postagem: ', selectedPostId);
+        await axios.delete(`${process.env.PUBLIC_API_URL}/posts/${selectedPostId}`, {
           headers: {
             Authorization: `Bearer ${session?.token}`,
           },
@@ -203,4 +204,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AdminPage;
+export default PostManagementPage;

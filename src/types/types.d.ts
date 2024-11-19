@@ -3,9 +3,9 @@ declare global {
     type RootStackParamList = {
       HomePage: undefined;    
       SignInPage: undefined;    
-      AdminPage: undefined;    
+      PostManagementPage: undefined;    
       PostPage: { postId: string | undefined };
-      CreateUserPage: undefined;
+      UserPage: undefined;
       ViewPostPage: { id: string };
       UserManagementPage: undefined; 
     };

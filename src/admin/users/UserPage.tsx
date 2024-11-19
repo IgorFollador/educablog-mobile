@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import axios from 'axios';
 import { z } from 'zod';
 
-const CreateUserPage = () => {
+const UserPage = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [name, setName] = useState<string>('');
@@ -119,7 +119,14 @@ const CreateUserPage = () => {
       setLoading(false);
 
       if (result.status === 201) {
-        navigation.navigate('AdminPage');
+        Alert.alert('Sucesso', 'Usuário criado com sucesso!');
+        // Limpar os campos
+        setEmail('');
+        setPassword('');
+        setName('');
+        setCPF('');
+        setPhone('');
+        setDate('');
       }
     } catch (err) {
       setLoading(false);
@@ -134,6 +141,7 @@ const CreateUserPage = () => {
               setError('Erro: Este email já está em uso.');
               break;
             case 500:
+              console.log('Erro no servidor:', err.response.data);
               setError('Erro no servidor. Por favor, tente novamente mais tarde.');
               break;
             default:
@@ -151,7 +159,7 @@ const CreateUserPage = () => {
   };
 
   const handleCancel = () => {
-    navigation.navigate('AdminPage');
+    navigation.navigate('PostManagementPage');
   };
 
   return (
@@ -299,4 +307,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CreateUserPage;
+export default UserPage;
