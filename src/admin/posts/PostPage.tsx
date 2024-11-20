@@ -13,7 +13,12 @@ type PostPageRouteProp = RouteProp<RootStackParamList, 'PostPage'>;
 const postSchema = z.object({
   titulo: z.string().min(3, 'O título é obrigatório e deve conter no mínimo 3 caracteres'),
   descricao: z.string().min(1, 'A descrição é obrigatória'),
-  imagemUrl: z.string().url('URL de imagem inválida').optional(),
+  imagemUrl: z
+    .string()
+    .optional()
+    .refine((val) => !val || /^https?:\/\/[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/.test(val), {
+      message: 'URL de imagem inválida',
+    }),
   ativo: z.boolean(),
   categoria: z.object({
     id: z.string().optional().nullable(),

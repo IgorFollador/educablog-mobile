@@ -5,6 +5,14 @@ import axios from 'axios';
 import { useRoute, useNavigation, NavigationProp } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+// Tipo para os parâmetros da rota
+interface RootStackParamList {
+  HomePage: undefined;
+  PostManagementPage: undefined;
+  ViewPostPage: { id: string };
+}
+
+// Tipo do Post
 interface Post {
   titulo: string;
   descricao: string;
@@ -19,9 +27,8 @@ const ViewPostPage = () => {
   const [error, setError] = useState<string>('');
   const route = useRoute();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { id } = route.params as { id: string };
+  const { id, isAdmin } = route.params as { id: string, isAdmin?: boolean };
   const apiUrl = Constants.expoConfig.extra.PUBLIC_API_URL;
-
 
   useEffect(() => {
     fetchPostData();
@@ -40,7 +47,11 @@ const ViewPostPage = () => {
   };
 
   const handleBack = () => {
-    navigation.navigate('HomePage');
+    if (isAdmin) {
+      navigation.navigate('PostManagementPage');
+    } else {
+      navigation.navigate('HomePage');
+    }
   };
 
   if (loading) {
