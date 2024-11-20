@@ -36,7 +36,6 @@ const ViewPostPage = () => {
 
   const fetchPostData = async () => {
     try {
-      
       const response = await axios.get(`${apiUrl}/posts/${id}`);
       setPost(response.data);
     } catch (err) {
@@ -44,6 +43,11 @@ const ViewPostPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Função para remover tags HTML da descrição
+  const removeHtmlTags = (description: string) => {
+    return description.replace(/<\/?[^>]+(>|$)/g, '');
   };
 
   const handleBack = () => {
@@ -80,7 +84,7 @@ const ViewPostPage = () => {
       )}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Descrição</Text>
-        <Text style={styles.description}>{post?.descricao}</Text>
+        <Text style={styles.description}>{removeHtmlTags(post?.descricao || '')}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Autor</Text>
@@ -182,6 +186,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  moreText: {
+    color: '#3B82F6',
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });
 
