@@ -26,7 +26,6 @@ const PostManagementPage = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -74,32 +73,37 @@ const PostManagementPage = () => {
   };
 
   const handleDelete = (postId: string) => {
-    setSelectedPostId(postId);
     Alert.alert(
       "Confirmação de exclusão",
       "Tem certeza de que deseja excluir esta postagem?",
       [
         { text: "Cancelar", style: "cancel" },
-        { text: "Excluir", onPress: confirmDelete, style: "destructive" }
+        {
+          text: "Excluir", 
+          onPress: () => handleConfirmDelete(postId),
+          style: "destructive"
+        }
       ]
     );
   };
 
-  const confirmDelete = async () => {
-    if (selectedPostId) {
-      try {
-        console.log('Excluindo postagem: ', selectedPostId);
-        await axios.delete(`${process.env.PUBLIC_API_URL}/posts/${selectedPostId}`, {
-          headers: {
-            Authorization: `Bearer ${session?.token}`,
-          },
-        });
-
-        setPosts(posts.filter((post) => post.id !== selectedPostId));
-      } catch (err) {
-        console.error('Erro ao deletar postagem:', err);
-        setError('Erro ao deletar postagem. Verifique sua conexão e tente novamente.');
-      }
+  const handleConfirmDelete = async (postId: string) => {
+    try {
+      setLoading(true); // Adiciona o estado de carregamento
+      console.log('Excluindo postagem: ', postId);
+      await axios.delete(`${process.env.PUBLIC_API_URL}/posts/${postId}`, {
+        headers: {
+          Authorization: `Bearer ${session?.token}`,
+        },
+      });
+  
+      // Atualiza o estado dos posts após a exclusão
+      setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+    } catch (err) {
+      console.error('Erro ao deletar postagem:', err);
+      setError('Erro ao deletar postagem. Verifique sua conexão e tente novamente.');
+    } finally {
+      setLoading(false); // Finaliza o estado de carregamento
     }
   };
 
@@ -115,7 +119,7 @@ const PostManagementPage = () => {
         isLoading={loading}
         isAdmin
         onEdit={handleEdit}
-        onDelete={handleDelete}
+        onDelete={() => handleDelete(item.id)}
       />
     </View>
   );
@@ -134,11 +138,7 @@ const PostManagementPage = () => {
         </View>
       }
       ListFooterComponent={
-        <>
-          {!loading && (
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-          )}
-        </>
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       }
       ListEmptyComponent={
         !loading && !posts.length ? <Text style={styles.errorText}>Nenhum post encontrado</Text> : null
@@ -148,50 +148,6 @@ const PostManagementPage = () => {
 };
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#FFF',
-    padding: 20,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-  },
-  drawerTitle: {
-    color: '#333',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  drawerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 8,
-    backgroundColor: '#EEE',
-  },
-  drawerItemText: {
-    marginLeft: 8,
-    fontSize: 16,
-    color: '#333',
-  },
-  closeButton: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  closeButtonText: {
-    color: '#003366',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  icon: {
-    color: '#333',
-    fontSize: 24,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
