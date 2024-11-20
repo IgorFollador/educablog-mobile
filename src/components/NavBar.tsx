@@ -39,24 +39,25 @@ const Navbar = ({ showLoginButton }: NavbarProps) => {
   const isHome = route.name === 'HomePage';
   const isPostPage = route.name === 'PostPage';
   const isUserPage = route.name === 'UserPage'; 
+  const isViewPostPage = route.name === 'ViewPostPage'; 
   const isAuthenticated = status === 'authenticated'; // Verifica se o usuário está autenticado
 
   return (
     <View style={styles.navbarContainer}>
       <View style={styles.navbarContent}>
         {/* Exibe o botão voltar */}
-        {(isUserPage ||isPostPage || (navigation.canGoBack() && !isHome && !isAuthenticated)) && (
+        {(isUserPage ||isPostPage || isViewPostPage || (navigation.canGoBack() && !isHome && !isAuthenticated)) && (
           <TouchableOpacity onPress={handleGoBack}>
             <Icon name="arrow-left" size={28} color="white" />
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity style={styles.logoContainer} onPress={() => navigation.navigate('HomePage')}>
+        <View style={styles.logoContainer}>
           <View style={styles.logoContent}>
             <Image source={require('../../assets/images/logo.png')} style={styles.logoImage} />
             <Text style={styles.logoText}>EducaBlog</Text>
           </View>
-        </TouchableOpacity>
+        </View>
 
         {showLoginButton && !isAuthenticated && (
           <TouchableOpacity onPress={handleLogin} style={styles.iconButton}>
