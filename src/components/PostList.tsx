@@ -44,7 +44,7 @@ const PostList: React.FC<PostListProps> = ({
 
   const handlePostClick = (postId: string) => {
     console.log('Clicou no post:', postId);
-    navigation.navigate('ViewPostPage', { id: postId });
+    navigation.navigate('ViewPostPage', { id: postId, isAdmin });
   };
 
   const removeHtmlTags = (description: string) => {
@@ -174,6 +174,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 16,
+    width: '100%',
   },
   buttonGroup: {
     flexDirection: 'row',
