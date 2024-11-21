@@ -3,11 +3,17 @@ import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'rea
 
 type User = {
   id: string;
-  cpf: string;
-  nome: string;
-  email: string;
-  dataNascimento: string;
-  telefone: string;
+  login: string;
+  senha: string;
+  tipo: string;
+  pessoa: {
+    id: string;
+    cpf: string;
+    nome: string;
+    email: string;
+    dataNascimento: string;
+    telefone: string;
+  }
 };
 
 interface UserListProps {
@@ -20,16 +26,19 @@ interface UserListProps {
 
 // Função para formatar CPF
 const formatCPF = (cpf: string) => {
+  if (!cpf) return 'N/A'; // Return a fallback if cpf is not available
   return cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4");
 };
 
 // Função para formatar telefone
 const formatPhone = (phone: string) => {
+  if (!phone) return 'N/A'; // Return a fallback if phone is not available
   return phone.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
 };
 
 // Função para formatar data
 const formatDate = (date: string) => {
+  if (!date) return 'N/A'; // Return a fallback if date is not available
   const [year, month, day] = date.split("-");
   return `${day}/${month}/${year}`;
 };
@@ -41,6 +50,7 @@ const UserList: React.FC<UserListProps> = ({
   onEdit,
   onDelete,
 }) => {
+
   if (isLoading) {
     return <ActivityIndicator size="large" color="#4CAF50" />;
   }
@@ -54,20 +64,25 @@ const UserList: React.FC<UserListProps> = ({
       {users.map((user) => (
         <View key={user.id} style={styles.userCard}>
           <View style={styles.infoContainer}>
+
+            <Text style={styles.label}>Tipo:</Text>
+            <Text style={styles.userInfo}>{user.tipo}</Text>
+
             <Text style={styles.label}>Nome:</Text>
-            <Text style={styles.userInfo}>{user.nome}</Text>
+            <Text style={styles.userInfo}>{user.pessoa?.nome || 'N/A'}</Text>
   
             <Text style={styles.label}>Email:</Text>
-            <Text style={styles.userInfo}>{user.email}</Text>
+            <Text style={styles.userInfo}>{user.pessoa?.email || 'N/A'}</Text>
   
             <Text style={styles.label}>CPF:</Text>
-            <Text style={styles.userInfo}>{formatCPF(user.cpf)}</Text>
+            <Text style={styles.userInfo}>{formatCPF(user.pessoa?.cpf) || 'N/A'}</Text>
   
             <Text style={styles.label}>Telefone:</Text>
-            <Text style={styles.userInfo}>{formatPhone(user.telefone)}</Text>
+            <Text style={styles.userInfo}>{formatPhone(user.pessoa?.telefone) || 'N/A'}</Text>
   
             <Text style={styles.label}>Data de Nascimento:</Text>
-            <Text style={styles.userInfo}>{formatDate(user.dataNascimento)}</Text>
+            <Text style={styles.userInfo}>{formatDate(user.pessoa?.dataNascimento) || 'N/A'}</Text>
+
           </View>
   
           {isAdmin && (

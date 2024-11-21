@@ -1,10 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, NavigationProp, useRoute, RouteProp } from '@react-navigation/native';
 import axios from 'axios';
 import { z } from 'zod';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Picker } from '@react-native-picker/picker';  // Importando o Picker
+
+type UserPageNavigationProp = NavigationProp<RootStackParamList, 'UserPage'>;
+type UserPageRouteProp = RouteProp<RootStackParamList, 'UserPage'>;
 
 const UserPage = () => {
+  const { params } = useRoute<UserPageRouteProp>();
+  const navigation = useNavigation<UserPageNavigationProp>();
+  const { userId } = params;
+
+  const [login, setLogin] = useState<string>('');
+  const [senha, setSenha] = useState<string>('');
+  const [tipo, setTipo] = useState<string>('aluno');  // Inicializa com 'aluno'
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [name, setName] = useState<string>('');
@@ -15,8 +27,7 @@ const UserPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-
+  // Validação com Zod
   const userSchema = z.object({
     email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
     password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
@@ -27,6 +38,7 @@ const UserPage = () => {
   });
 
   const formatCPF = (cpf: string) => {
+    if (!cpf) return 'N/A'
     return cpf
       .replace(/\D/g, '')
       .replace(/(\d{3})(\d)/, '$1.$2')
@@ -36,6 +48,7 @@ const UserPage = () => {
   };
 
   const formatPhone = (phone: string) => {
+    if (!phone) return 'N/A'
     return phone
       .replace(/\D/g, '')
       .replace(/(\d{2})(\d)/, '($1) $2')
@@ -44,6 +57,8 @@ const UserPage = () => {
   };
 
   const formatDate = (date: string) => {
+    if (!date) return 'N/A'
+
     let value = date.replace(/\D/g, '');
 
     if (value.length <= 2) {
@@ -95,10 +110,9 @@ const UserPage = () => {
     }
 
     try {
-      const result = await axios.post(
-        `${process.env.PUBLIC_API_URL}/usuario`,
+      const result = await axios.put(
+        `${process.env.PUBLIC_API_URL}/usuario/${userId}`,
         {
-          email: email,
           login: email,
           senha: password,
           pessoa: {
@@ -120,13 +134,21 @@ const UserPage = () => {
 
       if (result.status === 201) {
         Alert.alert('Sucesso', 'Usuário criado com sucesso!');
-        // Limpar os campos
+        // Limpar os campos:
+        setLogin('');
+        setSenha('');
+        setTipo('');
         setEmail('');
         setPassword('');
         setName('');
         setCPF('');
         setPhone('');
         setDate('');
+      }
+
+      if (result.status === 200) {
+        Alert.alert('Sucesso', 'Usuário atualizado com sucesso!');
+        navigation.goBack(); // Retorna para a página anterior
       }
     } catch (err) {
       setLoading(false);
@@ -159,14 +181,65 @@ const UserPage = () => {
   };
 
   const handleCancel = () => {
-    navigation.navigate('PostManagementPage');
+    navigation.goBack(); // Volta para a página anterior
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) return;
+
+        const response = await axios.get(`${process.env.PUBLIC_API_URL}/usuario/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const user = response.data;
+        setLogin(user.login);
+        setSenha(user.senha);
+        setTipo(user.tipo);
+        setEmail(user.pessoa.email);
+        setPassword(user.pessoa.senha);
+        setName(user.pessoa.nome);
+        setCPF(user.pessoa.cpf);
+        setPhone(user.pessoa.telefone);
+        setDate(user.pessoa.dataNascimento);
+      } catch (err) {
+        setLoading(false);
+        console.error('Erro ao carregar a postagem:', err.response.data);
+        setError('Erro ao carregar os dados do usuário.');
+      }
+    };
+
+    fetchUser();
+  }, [userId]);
 
   return (
     <View style={styles.container}>
       <View style={styles.form}>
-        <Text style={styles.title}>Cadastro</Text>
+        <Text style={styles.title}>Editar Usuário</Text>
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+        <TextInput
+          style={[styles.input, focusedField === 'login' && styles.focusedInput]}
+          placeholder="Login"
+          value={login}
+          onChangeText={setLogin}
+          onFocus={() => setFocusedField('login')}
+          onBlur={() => !login && setFocusedField(null)}
+        />
+
+        <TextInput
+          style={[styles.input, focusedField === 'senha' && styles.focusedInput]}
+          placeholder="Senha"
+          value={senha}
+          onChangeText={setSenha}
+          onFocus={() => setFocusedField('senha')}
+          onBlur={() => !senha && setFocusedField(null)}
+        />
 
         <TextInput
           style={[styles.input, focusedField === 'email' && styles.focusedInput]}
@@ -176,7 +249,6 @@ const UserPage = () => {
           onFocus={() => setFocusedField('email')}
           onBlur={() => !email && setFocusedField(null)}
           keyboardType="email-address"
-          autoCapitalize="none"
         />
 
         <TextInput
@@ -221,15 +293,15 @@ const UserPage = () => {
           keyboardType="numeric"
         />
 
-        <TextInput
-          style={[styles.input, focusedField === 'password' && styles.focusedInput]}
-          placeholder="Senha"
-          value={password}
-          onChangeText={setPassword}
-          onFocus={() => setFocusedField('password')}
-          onBlur={() => !password && setFocusedField(null)}
-          secureTextEntry
-        />
+        <Picker
+          selectedValue={tipo}
+          onValueChange={(itemValue) => setTipo(itemValue)}
+          style={[styles.input, focusedField === 'tipo' && styles.focusedInput]}
+        >
+          <Picker.Item label="Aluno" value="aluno" />
+          <Picker.Item label="Professor" value="professor" />
+          <Picker.Item label="Admin" value="admin" />
+        </Picker>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -237,7 +309,7 @@ const UserPage = () => {
             onPress={handleRegister}
             disabled={loading}
           >
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Cadastrar</Text>}
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Salvar</Text>}
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={handleCancel}>
