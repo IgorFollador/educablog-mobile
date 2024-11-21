@@ -5,7 +5,7 @@ declare global {
       SignInPage: undefined;    
       PostManagementPage: undefined;    
       PostPage: { postId: string | undefined };
-      UserPage: undefined;
+      UserPage: { userId: string | undefined };
       ViewPostPage: { id: string, isAdmin?: boolean };
       UserManagementPage: undefined; 
     };

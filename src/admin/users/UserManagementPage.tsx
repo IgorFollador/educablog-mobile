@@ -1,19 +1,24 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator, FlatList } from 'react-native';
 import axios from 'axios';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, NavigationProp, useRoute } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import UserList from '../../components/UserList';
 import Pagination from '../../components/Pagination';
 
 type User = {
   id: string;
-  nome: string;
-  email: string;
-  dataCriacao: string;
-  cpf: string;
-  dataNascimento: string; 
-  telefone: string;
+  login: string;
+  senha: string;
+  tipo: string;
+  pessoa: {
+    id: string;
+    cpf: string;
+    nome: string;
+    email: string;
+    dataNascimento: string;
+    telefone: string;
+  }
 };
 
 const UserManagementPage = () => {
@@ -25,7 +30,7 @@ const UserManagementPage = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-
+ 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const fetchUsers = useCallback(async (page: number, query: string = '') => {
@@ -34,14 +39,14 @@ const UserManagementPage = () => {
     const usersLimit = '10';
 
     try {
-      const response = await axios.get(`${process.env.PUBLIC_API_URL}/pessoa`, {
+      const response = await axios.get(`${process.env.PUBLIC_API_URL}/usuario`, {
         params: { query, limite: parseInt(usersLimit, 10), pagina: page },
         headers: {
           Authorization: `Bearer ${session?.token}`,
         },
       });
-      setUsers(response.data);
       setTotalPages(Math.ceil(response.headers['x-total-count'] / parseInt(usersLimit, 10)));
+      setUsers(response.data.usuarios || []);
     } catch (err) {
       console.error('Erro ao buscar usuários:', err);
       setError('Erro ao carregar os usuários.');
@@ -61,8 +66,8 @@ const UserManagementPage = () => {
     setSearchQuery(query);
   };
 
-  const handleEdit = (postId: string) => {
-    //navigation.navigate('UserPage', { userId });
+  const handleEdit = (userId: string) => {
+    navigation.navigate('UserPage', { userId });
   };
 
   const handleDelete = (userId: string) => {
@@ -81,13 +86,13 @@ const UserManagementPage = () => {
     if (selectedUserId) {
       try {
         console.log('Excluindo postagem: ', selectedUserId);
-        await axios.delete(`${process.env.PUBLIC_API_URL}/pessoa/${selectedUserId}`, {
+        await axios.delete(`${process.env.PUBLIC_API_URL}/usuario/${selectedUserId}`, {
           headers: {
             Authorization: `Bearer ${session?.token}`,
           },
         });
 
-        setUsers(users.filter((user) => user.id !== selectedUserId));
+        setUsers(users.filter((usuario) => usuario.id !== selectedUserId));
         Alert.alert('Sucesso', 'Usuário excluído com sucesso.');
 
       } catch (err) {

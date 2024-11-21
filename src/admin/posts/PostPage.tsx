@@ -6,7 +6,6 @@ import { z } from 'zod';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 
-
 type PostPageNavigationProp = NavigationProp<RootStackParamList, 'PostPage'>;
 type PostPageRouteProp = RouteProp<RootStackParamList, 'PostPage'>;
 

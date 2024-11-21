@@ -52,7 +52,7 @@ const PostManagementPage = () => {
             },
           });
 
-      setPosts(response.data);
+      setPosts(response.data || []);
       setTotalPages(Math.ceil(response.headers['x-total-count'] / parseInt(postsLimit, 10)));
     } catch (err) {
       console.error('Erro ao buscar posts:', err);
