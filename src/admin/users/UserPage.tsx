@@ -14,28 +14,33 @@ const UserPage = () => {
   const { params } = useRoute<UserPageRouteProp>();
   const navigation = useNavigation<UserPageNavigationProp>();
   const { userId } = params || {};
+  const [pessoaId, setPessoaId] = useState<string>('');
   const [login, setLogin] = useState<string>('');
   const [senha, setSenha] = useState<string>('');
   const [tipo, setTipo] = useState<string>('aluno');  // Inicializa com 'aluno'
   const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [name, setName] = useState<string>('');
+  const [nome, setNome] = useState<string>('');
   const [cpf, setCPF] = useState<string>('');
-  const [phone, setPhone] = useState<string>('');
-  const [date, setDate] = useState<string>('');
+  const [telefone, setTelefone] = useState<string>('');
+  const [dataNascimento, setDataNascimento] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   // Validação com Zod
   const userSchema = z.object({
-    email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
-    password: z.string(),
-    name: z.string().min(1, 'Nome é obrigatório'),
-    cpf: z.string().length(11, 'CPF deve ter 11 dígitos'),
-    phone: z.string().min(10, 'Telefone inválido'),
-    date: z.string().nonempty('Data de nascimento é obrigatória')
-  });
+    login: z.string().nonempty('Login é obrigatório'),
+    senha: z.string().nonempty('Senha é obrigatória'),
+    tipo: z.enum(['aluno', 'professor', 'admin']),
+    pessoa: z.object({
+      id: z.string().optional().nullable(),
+      email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
+      nome: z.string().nonempty('Nome é obrigatório'),
+      cpf: z.string().nonempty('CPF deve ter 11 dígitos'),
+      telefone: z.string().nonempty('Telefone inválido'),
+      dataNascimento: z.string().nonempty('Data de nascimento é obrigatória'),
+    }),
+  });  
 
   const formatCPF = (cpf: string) => {
     if (!cpf) return 'N/A'
@@ -57,10 +62,17 @@ const UserPage = () => {
   };
 
   const formatDate = (date: string) => {
-    if (!date) return 'N/A'
-
+    if (!date) return '';
+  
+    // Verifica se a data está no formato yyyy-MM-dd
+    if (date.includes('-')) {
+      const [year, month, day] = date.split('-');
+      return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+    }
+  
+    // Caso seja um input sendo digitado (dd/MM/yyyy)
     let value = date.replace(/\D/g, '');
-
+  
     if (value.length <= 2) {
       value = value.replace(/(\d{2})/, '$1');
     } else if (value.length <= 4) {
@@ -68,13 +80,14 @@ const UserPage = () => {
     } else {
       value = value.replace(/(\d{2})(\d{2})(\d{4})/, '$1/$2/$3');
     }
-
+  
     return value;
   };
+  
 
   const handleCPFChange = (value: string) => setCPF(formatCPF(value));
-  const handlePhoneChange = (value: string) => setPhone(formatPhone(value));
-  const handleDateChange = (value: string) => setDate(formatDate(value));
+  const handlePhoneChange = (value: string) => setTelefone(formatPhone(value));
+  const handleDateChange = (value: string) => setDataNascimento(formatDate(value));
 
   const cleanCPF = (cpf: string) => cpf.replace(/\D/g, '');
   const cleanPhone = (phone: string) => phone.replace(/\D/g, '');
@@ -86,72 +99,62 @@ const UserPage = () => {
   };
 
   const handleRegister = async () => {
-    setError(''); // Limpa erros anteriores
-    setLoading(true); // Define o estado de loading como verdadeiro
+    setError('');
+    setLoading(true); 
   
-    const formattedDate = formatDateToAPI(date);
+    const formattedDate = formatDateToAPI(dataNascimento);
   
     const userData = {
-      email,
-      password,
-      name,
-      cpf: cleanCPF(cpf),
-      phone: cleanPhone(phone),
-      date: formattedDate,
+      login,
+      senha,
+      tipo,
+      pessoa: {
+        id: pessoaId || null, 
+        cpf: cleanCPF(cpf),
+        nome,
+        email,
+        dataNascimento: formattedDate,
+        telefone: cleanPhone(telefone),
+      },
     };
   
     const validation = userSchema.safeParse(userData);
   
     if (!validation.success) {
       const errors = validation.error.issues.map((issue) => issue.message).join(', ');
-      setError(errors); // Define os erros de validação
-      setLoading(false); // Define o loading como falso, pois o processo terminou
+      setError(errors); 
+      setLoading(false);
       return;
     }
   
     try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        setError('Você precisa estar autenticado para criar ou editar uma postagem.');
+        setLoading(false);
+        return;
+      }
+
       let result;
   
       if (userId) {
+        console.log('Chamou o alterar:', validation.data);
+
         // Se existir um userId, estamos editando
         result = await axios.put(
-          `${process.env.PUBLIC_API_URL}/usuario/${userId}`,
+          `${process.env.PUBLIC_API_URL}/usuario/${userId}`, validation.data,
           {
-            login: email,
-            senha: password,
-            pessoa: {
-              cpf: cleanCPF(cpf),
-              nome: name,
-              email: email,
-              dataNascimento: formattedDate,
-              telefone: cleanPhone(phone),
-            },
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
       } else {
+        console.log('Chamou o criar:', validation.data);
+
         // Se não existir userId, estamos criando um novo usuário
         result = await axios.post(
-          `${process.env.PUBLIC_API_URL}/usuario`,
+          `${process.env.PUBLIC_API_URL}/usuario`, validation.data,
           {
-            login: email,
-            senha: password,
-            pessoa: {
-              cpf: cleanCPF(cpf),
-              nome: name,
-              email: email,
-              dataNascimento: formattedDate,
-              telefone: cleanPhone(phone),
-            },
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
       }
@@ -160,21 +163,26 @@ const UserPage = () => {
   
       if (result.status === 201) {
         Alert.alert('Sucesso', 'Usuário criado com sucesso!');
+        
         // Limpar os campos:
+        setPessoaId('');
         setLogin('');
         setSenha('');
         setTipo('aluno');
         setEmail('');
-        setPassword('');
-        setName('');
+        setNome('');
         setCPF('');
-        setPhone('');
-        setDate('');
+        setTelefone('');
+        setDataNascimento('');
       }
   
       if (result.status === 200) {
-        Alert.alert('Sucesso', 'Usuário atualizado com sucesso!');
-        navigation.goBack(); // Retorna para a página anterior
+        Alert.alert('Sucesso', 'Usuário atualizado com sucesso.', [
+          {
+            text: 'OK',
+            onPress: () => navigation.goBack(),
+          },
+        ]);
       }
     } catch (err) {
       setLoading(false); // Em caso de erro, definimos loading como falso
@@ -194,6 +202,7 @@ const UserPage = () => {
               setError('Erro no servidor. Por favor, tente novamente mais tarde.');
               break;
             default:
+              console.log('Erro no desconhecido:', err.response.data);
               setError('Erro desconhecido. Por favor, tente novamente.');
           }
         } else if (err.request) {
@@ -232,18 +241,19 @@ const UserPage = () => {
           });
     
           const user = response.data;
-          setLogin(user.login);
-          setSenha(user.senha);
-          setTipo(user.tipo);
-          setEmail(user.pessoa.email);
-          setPassword(user.pessoa.senha);
-          setName(user.pessoa.nome);
-          setCPF(user.pessoa.cpf);
-          setPhone(user.pessoa.telefone);
-          setDate(user.pessoa.dataNascimento);
+  
+          setPessoaId(user.pessoa.id || '');
+          setLogin(user.login || '');
+          setSenha(user.senha || ''); // Preenchendo corretamente a senha
+          setTipo(user.tipo || 'aluno');
+          setEmail(user.pessoa.email || '');
+          setNome(user.pessoa.nome || '');
+          setCPF(formatCPF(user.pessoa.cpf || ''));
+          setTelefone(formatPhone(user.pessoa.telefone || ''));
+          setDataNascimento(formatDate(user.pessoa.dataNascimento || ''));
     
         } catch (err) {
-          console.error('Erro ao carregar a postagem:', err);
+          console.error('Erro ao carregar os dados do usuário:', err);
           setError('Erro ao carregar os dados do usuário.');
         } finally {
           setLoading(false); // Garantir que o loading seja desligado após o fetch
@@ -252,8 +262,7 @@ const UserPage = () => {
     
       fetchUser();
     }
-  }, [userId]);
-  
+  }, [userId]);  
 
   return (
     <ScrollView>
@@ -291,12 +300,12 @@ const UserPage = () => {
           />
 
           <TextInput
-            style={[styles.input, focusedField === 'name' && styles.focusedInput]}
+            style={[styles.input, focusedField === 'nome' && styles.focusedInput]}
             placeholder="Nome Completo"
-            value={name}
-            onChangeText={setName}
+            value={nome}
+            onChangeText={setNome}
             onFocus={() => setFocusedField('name')}
-            onBlur={() => !name && setFocusedField(null)}
+            onBlur={() => !nome && setFocusedField(null)}
           />
 
           <TextInput
@@ -313,10 +322,10 @@ const UserPage = () => {
           <TextInput
             style={[styles.input, focusedField === 'phone' && styles.focusedInput]}
             placeholder="Telefone"
-            value={phone}
+            value={telefone}
             onChangeText={handlePhoneChange}
             onFocus={() => setFocusedField('phone')}
-            onBlur={() => !phone && setFocusedField(null)}
+            onBlur={() => !telefone && setFocusedField(null)}
             maxLength={15}
             keyboardType="phone-pad"
           />
@@ -324,10 +333,10 @@ const UserPage = () => {
           <TextInput
             style={[styles.input, focusedField === 'date' && styles.focusedInput]}
             placeholder="Data de nascimento"
-            value={date}
+            value={dataNascimento}
             onChangeText={handleDateChange}
             onFocus={() => setFocusedField('date')}
-            onBlur={() => !date && setFocusedField(null)}
+            onBlur={() => !dataNascimento && setFocusedField(null)}
             maxLength={10}
             keyboardType="numeric"
           />
