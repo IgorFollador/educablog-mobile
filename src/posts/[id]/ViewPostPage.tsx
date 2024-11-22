@@ -4,6 +4,7 @@ import { View, Text, Image, TouchableOpacity, ActivityIndicator, ScrollView, Sty
 import axios from 'axios';
 import { useRoute, useNavigation, NavigationProp } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { removeHtmlTags } from '../../services/Utils';
 
 // Tipo para os parâmetros da rota
 interface RootStackParamList {
@@ -27,7 +28,7 @@ const ViewPostPage = () => {
   const [error, setError] = useState<string>('');
   const route = useRoute();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { id, isAdmin } = route.params as { id: string, isAdmin?: boolean };
+  const { id, isAdmin } = route.params as { id: string, isAdmin: boolean };
   const apiUrl = Constants.expoConfig.extra.PUBLIC_API_URL;
 
   useEffect(() => {
@@ -45,17 +46,8 @@ const ViewPostPage = () => {
     }
   };
 
-  // Função para remover tags HTML da descrição
-  const removeHtmlTags = (description: string) => {
-    return description.replace(/<\/?[^>]+(>|$)/g, '');
-  };
-
   const handleBack = () => {
-    if (isAdmin) {
-      navigation.navigate('PostManagementPage');
-    } else {
-      navigation.navigate('HomePage');
-    }
+    isAdmin ? navigation.navigate('PostManagementPage') : navigation.navigate('HomePage');
   };
 
   if (loading) {

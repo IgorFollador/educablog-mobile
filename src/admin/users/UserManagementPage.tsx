@@ -29,8 +29,6 @@ const UserManagementPage = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
- 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const fetchUsers = useCallback(async (page: number, query: string = '') => {
@@ -71,34 +69,31 @@ const UserManagementPage = () => {
   };
 
   const handleDelete = (userId: string) => {
-    setSelectedUserId(userId);
     Alert.alert(
       "Confirmação de exclusão",
       "Tem certeza de que deseja excluir este usuário?",
       [
         { text: "Cancelar", style: "cancel" },
-        { text: "Excluir", onPress: confirmDelete, style: "destructive" }
+        { text: "Excluir", onPress: () => confirmDelete(userId), style: "destructive" }
       ]
     );
   };
 
-  const confirmDelete = async () => {
-    if (selectedUserId) {
-      try {
-        console.log('Excluindo postagem: ', selectedUserId);
-        await axios.delete(`${process.env.PUBLIC_API_URL}/usuario/${selectedUserId}`, {
-          headers: {
-            Authorization: `Bearer ${session?.token}`,
-          },
-        });
+  const confirmDelete = async (userId: string) => {
+    try {
+      console.log('Excluindo usuario: ', userId);
+      await axios.delete(`${process.env.PUBLIC_API_URL}/usuario/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${session?.token}`,
+        },
+      });
 
-        setUsers(users.filter((usuario) => usuario.id !== selectedUserId));
-        Alert.alert('Sucesso', 'Usuário excluído com sucesso.');
+      setUsers(users.filter((user) => user.id !== userId));
+      Alert.alert('Sucesso', 'Usuário excluído com sucesso.');
 
-      } catch (err) {
-        console.error('Erro ao deletar postagem:', err.response.data);
-        setError('Erro ao deletar postagem. Verifique sua conexão e tente novamente.');
-      }
+    } catch (err) {
+      console.error('Erro ao deletar postagem:', err.response.data);
+      setError('Erro ao deletar postagem. Verifique sua conexão e tente novamente.');
     }
   };
 

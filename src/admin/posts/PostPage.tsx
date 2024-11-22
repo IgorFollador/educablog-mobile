@@ -5,6 +5,7 @@ import { useNavigation, useRoute, NavigationProp, RouteProp } from '@react-navig
 import { z } from 'zod';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
+import { removeHtmlTags } from '../../services/Utils';
 
 type PostPageNavigationProp = NavigationProp<RootStackParamList, 'PostPage'>;
 type PostPageRouteProp = RouteProp<RootStackParamList, 'PostPage'>;
@@ -75,7 +76,7 @@ const PostPage = () => {
         try {
           const token = await AsyncStorage.getItem('userToken');
           if (!token) return;
-          
+
           const response = await axios.get(`${process.env.PUBLIC_API_URL}/posts/${postId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
@@ -168,7 +169,7 @@ const PostPage = () => {
         <TextInput
           style={[styles.input, focusedField === 'descricao' && styles.focusedInput]}
           placeholder="Descrição"
-          value={description}
+          value={removeHtmlTags(description)}
           onChangeText={setDescription}
           multiline
           onFocus={() => setFocusedField('descricao')}

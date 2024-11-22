@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Text, TouchableOpacity, View, Image, FlatList, StyleSheet } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { removeHtmlTags } from '../services/Utils';
 
 type Post = {
   id: string;
@@ -45,10 +46,6 @@ const PostList: React.FC<PostListProps> = ({
   const handlePostClick = (postId: string) => {
     console.log('Clicou no post:', postId);
     navigation.navigate('ViewPostPage', { id: postId, isAdmin });
-  };
-
-  const removeHtmlTags = (description: string) => {
-    return description.replace(/<\/?[^>]+(>|$)/g, '');
   };
 
   const truncateDescription = (description: string, length: number) => {
