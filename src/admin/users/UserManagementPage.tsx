@@ -58,7 +58,17 @@ const UserManagementPage = () => {
       fetchUsers(currentPage, searchQuery);
     }
   }, [session, status, currentPage, searchQuery, fetchUsers]);
-
+  
+  useEffect(() => {
+    if (status === 'authenticated' && session?.token) {
+      const unsubscribe = navigation.addListener('focus', () => {
+        fetchUsers(currentPage, searchQuery);
+      });
+  
+      return unsubscribe;
+    }
+  }, [navigation, fetchUsers, currentPage, searchQuery, session?.token, status]);  
+  
   const handleSearch = (query: string) => {
     setCurrentPage(1);
     setSearchQuery(query);
