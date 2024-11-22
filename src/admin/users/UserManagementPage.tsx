@@ -81,7 +81,7 @@ const UserManagementPage = () => {
 
   const confirmDelete = async (userId: string) => {
     try {
-      console.log('Excluindo usuario: ', userId);
+      console.log('Excluindo usuário: ', userId);
       await axios.delete(`${process.env.PUBLIC_API_URL}/usuario/${userId}`, {
         headers: {
           Authorization: `Bearer ${session?.token}`,
@@ -92,8 +92,8 @@ const UserManagementPage = () => {
       Alert.alert('Sucesso', 'Usuário excluído com sucesso.');
 
     } catch (err) {
-      console.error('Erro ao deletar postagem:', err.response.data);
-      setError('Erro ao deletar postagem. Verifique sua conexão e tente novamente.');
+      console.error('Erro ao deletar usuário:', err.response?.data || err);
+      setError('Erro ao deletar usuário. Verifique sua conexão e tente novamente.');
     }
   };
 
