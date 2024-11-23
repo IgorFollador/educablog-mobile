@@ -196,7 +196,7 @@ const UserPage = () => {
               setError('Dados inválidos. Verifique os campos e tente novamente.');
               break;
             case 409:
-              setError('Erro: Este email já está em uso.');
+              setError('CPF ou Login já cadastrados.');
               break;
             case 500:
               console.log('Erro no servidor:', err.response.data);
