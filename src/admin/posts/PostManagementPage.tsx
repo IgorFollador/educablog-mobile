@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator, FlatList } from 'react-native';
 import axios from 'axios';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import PostList from '../../components/PostList';
-import Pagination from '../../components/Pagination';
 import SearchBar from '../../components/SearchBar';
+import ScrollTopButton from '../../components/ScrollToTopButton';
 
 type Post = {
   id: string;
@@ -29,6 +29,8 @@ const PostManagementPage = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isVisible, setIsVisible] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
@@ -136,26 +138,41 @@ const PostManagementPage = () => {
     </View>
   );
 
+  const handleScroll = (event: any) => {
+    const currentScrollPos = event.nativeEvent.contentOffset.y;
+    setIsVisible(currentScrollPos > 200); // Botão aparece após rolar 200px
+  };
+
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
   return (
-    <FlatList
-      data={[...posts]}
-      keyExtractor={(item) => item.id}
-      renderItem={renderItem}
-      ListHeaderComponent={
-        <View style={{ padding: 16 }}>
-          <Text style={styles.title}>Administração de Postagens</Text>
-          <SearchBar onSearch={handleSearch} />
-          {error && <Text style={styles.errorText}>{error}</Text>}
-          {loading && <ActivityIndicator size="large" color="#0000ff" />}
-        </View>
-      }
-      ListFooterComponent={
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-      }
-      ListEmptyComponent={
-        !loading && !posts.length ? <Text style={styles.errorText}>Nenhum post encontrado</Text> : null
-      }
-    />
+    <View style={{ flex: 1 }}>
+      <FlatList
+        ref={flatListRef}
+        data={[...posts]}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        ListHeaderComponent={
+          <View style={{ padding: 16 }}>
+            <Text style={styles.title}>Administração de Postagens</Text>
+            <SearchBar onSearch={handleSearch} />
+            {error && <Text style={styles.errorText}>{error}</Text>}
+            {loading && <ActivityIndicator size="large" color="#0000ff" />}
+          </View>
+        }
+        ListEmptyComponent={
+          !loading && !posts.length ? <Text style={styles.errorText}>Nenhum post encontrado</Text> : null
+        }
+        ListFooterComponent={<View style={{ height: 60 }} />}
+        showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      />
+
+      <ScrollTopButton isVisible={isVisible} scrollToTop={scrollToTop} />
+    </View>
   );
 };
 

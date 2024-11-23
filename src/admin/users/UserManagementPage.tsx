@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator, FlatList } from 'react-native';
 import axios from 'axios';
 import { useNavigation, NavigationProp, useRoute } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import UserList from '../../components/UserList';
-import Pagination from '../../components/Pagination';
+import ScrollTopButton from '../../components/ScrollToTopButton';
 
 type User = {
   id: string;
@@ -30,6 +30,8 @@ const UserManagementPage = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const [isVisible, setIsVisible] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
 
   const fetchUsers = useCallback(async (page: number, query: string = '') => {
     setLoading(true);
@@ -117,26 +119,39 @@ const UserManagementPage = () => {
     </View>
   );
 
+  const handleScroll = (event: any) => {
+    const currentScrollPos = event.nativeEvent.contentOffset.y;
+    setIsVisible(currentScrollPos > 200); // Botão aparece após rolar 200px
+  };
+
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
   return (
-    <FlatList
-      data={users}
-      keyExtractor={(item) => item.id}
-      renderItem={renderItem}
-      ListHeaderComponent={
-        <View style={{ padding: 16 }}>
-          <Text style={styles.title}>Gerenciamento de Usuários</Text>
-          {error && <Text style={styles.errorText}>{error}</Text>}
-          {loading && <ActivityIndicator size="large" color="#0000ff" />}
-        </View>
-      }
-      ListFooterComponent={
-        !loading && (
-          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-        )
-      }
-      ListEmptyComponent={!loading && !users.length ? <Text style={styles.errorText}>Nenhum usuário encontrado</Text> : null}
-      contentContainerStyle={{ paddingBottom: 50 }}
-    />
+    <View style={{ flex: 1 }}>
+      <FlatList
+        ref={flatListRef}
+        data={users}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        ListHeaderComponent={
+          <View style={{ padding: 16 }}>
+            <Text style={styles.title}>Gerenciamento de Usuários</Text>
+            {error && <Text style={styles.errorText}>{error}</Text>}
+            {loading && <ActivityIndicator size="large" color="#0000ff" />}
+          </View>
+        }
+        ListFooterComponent={<View style={{ height: 60 }} />}
+        ListEmptyComponent={!loading && !users.length ? <Text style={styles.errorText}>Nenhum usuário encontrado</Text> : null}
+        contentContainerStyle={{ paddingBottom: 50 }}
+        showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      />
+      
+      <ScrollTopButton isVisible={isVisible} scrollToTop={scrollToTop} />
+    </View>
   );
 };
 
