@@ -175,7 +175,7 @@ const PostPage = () => {
               setError('Dados inválidos. Verifique os campos e tente novamente.');
               break;
             case 409:
-              setError('Erro: Este título de Post já está em uso.');
+              setError('Post já cadastrado.');
               break;
             case 500:
               console.log('Erro no servidor:', err.response.data);
