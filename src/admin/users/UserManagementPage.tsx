@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator, FlatList } from 'react-native';
 import axios from 'axios';
-import { useNavigation, NavigationProp, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect, RouteProp, NavigationProp } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import UserList from '../../components/UserList';
 import ScrollTopButton from '../../components/ScrollToTopButton';
@@ -18,8 +18,10 @@ type User = {
     email: string;
     dataNascimento: string;
     telefone: string;
-  }
+  };
 };
+
+type UserPageRouteProp = RouteProp<RootStackParamList, 'UserManagementPage'>;
 
 const UserManagementPage = () => {
   const { data: session, status } = useAuth();
@@ -32,6 +34,8 @@ const UserManagementPage = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [isVisible, setIsVisible] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const { params } = useRoute<UserPageRouteProp>();
+  const isProfessor = params?.isProfessor;
 
   const fetchUsers = useCallback(async (page: number, query: string = '') => {
     setLoading(true);
@@ -39,12 +43,14 @@ const UserManagementPage = () => {
     const usersLimit = '10';
 
     try {
-      const response = await axios.get(`${process.env.PUBLIC_API_URL}/usuario`, {
-        params: { query, limite: parseInt(usersLimit, 10), pagina: page },
+      const userType = isProfessor ? 'professor' : 'aluno';
+      const response = await axios.get(`${process.env.PUBLIC_API_URL}/usuario/tipoUsuario`, {
+        params: { tipo: userType },
         headers: {
           Authorization: `Bearer ${session?.token}`,
         },
       });
+
       setTotalPages(Math.ceil(response.headers['x-total-count'] / parseInt(usersLimit, 10)));
       setUsers(response.data.usuarios || []);
     } catch (err) {
@@ -53,24 +59,17 @@ const UserManagementPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [session?.token]);
+  }, [session?.token, isProfessor]);
 
-  useEffect(() => {
-    if (status === 'authenticated' && session?.token) {
-      fetchUsers(currentPage, searchQuery);
-    }
-  }, [session, status, currentPage, searchQuery, fetchUsers]);
-  
-  useEffect(() => {
-    if (status === 'authenticated' && session?.token) {
-      const unsubscribe = navigation.addListener('focus', () => {
+  // Carrega os usuários ao focar na tela ou mudar o parâmetro `isProfessor`
+  useFocusEffect(
+    useCallback(() => {
+      if (status === 'authenticated' && session?.token) {
         fetchUsers(currentPage, searchQuery);
-      });
-  
-      return unsubscribe;
-    }
-  }, [navigation, fetchUsers, currentPage, searchQuery, session?.token, status]);  
-  
+      }
+    }, [status, session?.token, currentPage, searchQuery, fetchUsers])
+  );
+
   const handleSearch = (query: string) => {
     setCurrentPage(1);
     setSearchQuery(query);
@@ -82,11 +81,11 @@ const UserManagementPage = () => {
 
   const handleDelete = (userId: string) => {
     Alert.alert(
-      "Confirmação de exclusão",
-      "Tem certeza de que deseja excluir este usuário?",
+      'Confirmação de exclusão',
+      'Tem certeza de que deseja excluir este usuário?',
       [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Excluir", onPress: () => confirmDelete(userId), style: "destructive" }
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Excluir', onPress: () => confirmDelete(userId), style: 'destructive' },
       ]
     );
   };
@@ -101,7 +100,6 @@ const UserManagementPage = () => {
 
       setUsers(users.filter((user) => user.id !== userId));
       Alert.alert('Sucesso', 'Usuário excluído com sucesso.');
-  
     } catch (err) {
       console.error('Erro ao deletar usuário', err.response?.data || err);
       setError('Erro ao excluir. Verifique sua conexão e tente novamente.');
@@ -137,7 +135,9 @@ const UserManagementPage = () => {
         renderItem={renderItem}
         ListHeaderComponent={
           <View style={{ padding: 16 }}>
-            <Text style={styles.title}>Gerenciamento de Usuários</Text>
+            <Text style={styles.title}>
+              Gerenciamento de {isProfessor ? 'Professores' : 'Alunos'}
+            </Text>
             {error && <Text style={styles.errorText}>{error}</Text>}
             {loading && <ActivityIndicator size="large" color="#0000ff" />}
           </View>
@@ -149,7 +149,7 @@ const UserManagementPage = () => {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       />
-      
+
       <ScrollTopButton isVisible={isVisible} scrollToTop={scrollToTop} />
     </View>
   );

@@ -57,9 +57,9 @@ const Footer = () => {
     navigation.navigate('UserPage');
   };
 
-  const handleNavigateToUserManagementPage = () => {
+  const handleNavigateToTeacherManagementPage = (isProfessor: boolean) => {
     setShowActionsDrawer(false); 
-    navigation.navigate('UserManagementPage');
+    navigation.navigate('UserManagementPage', { isProfessor });
   };
 
   return (
@@ -99,9 +99,13 @@ const Footer = () => {
                 <Icon name="user-plus" style={styles.icon} />
                 <Text style={styles.drawerItemText}>Adicionar Usuário</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleNavigateToUserManagementPage} style={styles.drawerItem}>
+              <TouchableOpacity onPress={() => handleNavigateToTeacherManagementPage(true)} style={styles.drawerItem}>
                 <Icon name="users" style={styles.icon} />
-                <Text style={styles.drawerItemText}>Gerenciar Usuários</Text>
+                <Text style={styles.drawerItemText}>Gerenciar Professores</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleNavigateToTeacherManagementPage(false)} style={styles.drawerItem}>
+                <Icon name="users" style={styles.icon} />
+                <Text style={styles.drawerItemText}>Gerenciar Alunos</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setShowActionsDrawer(false)} style={styles.closeButton}>
                 <Text style={styles.closeButtonText}>Fechar</Text>
