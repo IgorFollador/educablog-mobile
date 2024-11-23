@@ -112,12 +112,14 @@ const PostManagementPage = () => {
     setSearchQuery(query);
   };
 
+  const { isAdmin } = useAuth();
+
   const renderItem = ({ item }: { item: Post }) => (
     <View style={{ alignItems: 'center', marginHorizontal: 16 }}>
       <PostList
         posts={[item]}
         isLoading={loading}
-        isAdmin
+        isAdmin={isAdmin()}
         onEdit={handleEdit}
         onDelete={() => handleDelete(item.id)}
       />

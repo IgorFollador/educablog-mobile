@@ -6,7 +6,8 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 interface AuthContextType {
   status: 'loading' | 'authenticated' | 'unauthenticated';
   initializing: boolean;
-  data: any;
+  isAdmin: () => boolean;
+  data: { token: string; tipo: string } | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
 }
@@ -16,14 +17,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
   const [initializing, setInitializing] = useState<boolean>(true);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<{ token: string; tipo: string } | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem('userToken');
+      const tipo = (await AsyncStorage.getItem('userTipo')) || 'default'; // Valor padrão para `tipo`
+
       if (token) {
         setStatus('authenticated');
-        setData({ token });
+        setData({ token, tipo });
       } else {
         setStatus('unauthenticated');
       }
@@ -35,11 +38,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const success = await authenticate(email, password);
+    // Garantindo o tipo de retorno
+    const success: { token: string; tipo?: string } | null = await authenticate(email, password);
+
     if (success) {
+      const { token, tipo = 'default' } = success; // Valor padrão para `tipo`
       setStatus('authenticated');
-      setData({ token: success.token });
-      await AsyncStorage.setItem('userToken', success.token);
+      setData({ token, tipo });
+      await AsyncStorage.setItem('userToken', token);
+      await AsyncStorage.setItem('userTipo', tipo);
       return true;
     } else {
       setStatus('unauthenticated');
@@ -52,9 +59,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setStatus('unauthenticated');
     setData(null);
     await AsyncStorage.removeItem('userToken');
+    await AsyncStorage.removeItem('userTipo');
   };
 
-  // Exibe o indicador de carregamento do AuthContext
   if (initializing) {
     return (
       <View style={styles.loadingContainer}>
@@ -63,8 +70,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
+  const isAdmin = () => data?.tipo === 'professor';
+  const isAuthenticated = status === 'authenticated';
+
   return (
-    <AuthContext.Provider value={{ status, initializing, data, login, logout }}>
+    <AuthContext.Provider value={{ status, initializing, isAdmin, data, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

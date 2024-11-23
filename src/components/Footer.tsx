@@ -7,8 +7,10 @@ import { useAuth } from '../context/AuthContext';
 
 const Footer = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { status, initializing } = useAuth();
+  const { initializing } = useAuth();
   const [showActionsDrawer, setShowActionsDrawer] = useState(false);
+
+  const { isAdmin } = useAuth();
 
   if (initializing) {
     return (
@@ -20,11 +22,7 @@ const Footer = () => {
 
   const handleNavigateToHome = () => {
     try {
-      if (status === 'authenticated') {
-        navigation.navigate('PostManagementPage');
-      } else {
-        navigation.navigate('HomePage');
-      }
+      isAdmin()? navigation.navigate('PostManagementPage') : navigation.navigate('HomePage');
     } catch (error) {
       console.error("Erro ao navegar:", error);
       Alert.alert('Erro de navegação', 'Não foi possível navegar para a página inicial.');
@@ -46,9 +44,7 @@ const Footer = () => {
   };
 
   const handlePlusClick = () => {
-    if (status === 'authenticated') {
-      setShowActionsDrawer(true);
-    }
+    setShowActionsDrawer(isAdmin());
   };
 
   const handleNavigateToPostPage = () => {
@@ -79,40 +75,43 @@ const Footer = () => {
           <Icon name="envelope" size={25} color="#FFF" />
         </TouchableOpacity>
 
-        {status === 'authenticated' && (
+        {isAdmin() &&  (
           <TouchableOpacity onPress={handlePlusClick}>
             <Icon name="pencil" size={25} color="#FFF" />
           </TouchableOpacity>
         )}
       </View>
-
-      <Modal
-        visible={showActionsDrawer}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowActionsDrawer(false)}
-      >
-        <View style={styles.drawerContainer}>
-          <View style={styles.drawerContent}>
-            <TouchableOpacity onPress={handleNavigateToPostPage} style={styles.drawerItem}>
-              <Icon name="file-text" style={styles.icon} />
-              <Text style={styles.drawerItemText}>Adicionar Post</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleNavigateToUserPage} style={styles.drawerItem}>
-              <Icon name="user-plus" style={styles.icon} />
-              <Text style={styles.drawerItemText}>Adicionar Usuário</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleNavigateToUserManagementPage} style={styles.drawerItem}>
-              <Icon name="users" style={styles.icon} />
-              <Text style={styles.drawerItemText}>Gerenciar Usuários</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setShowActionsDrawer(false)} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Fechar</Text>
-            </TouchableOpacity>
+      
+      {isAdmin() &&  (
+        <Modal
+          visible={showActionsDrawer}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShowActionsDrawer(false)}
+        >
+          <View style={styles.drawerContainer}>
+            <View style={styles.drawerContent}>
+              <TouchableOpacity onPress={handleNavigateToPostPage} style={styles.drawerItem}>
+                <Icon name="file-text" style={styles.icon} />
+                <Text style={styles.drawerItemText}>Adicionar Post</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleNavigateToUserPage} style={styles.drawerItem}>
+                <Icon name="user-plus" style={styles.icon} />
+                <Text style={styles.drawerItemText}>Adicionar Usuário</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleNavigateToUserManagementPage} style={styles.drawerItem}>
+                <Icon name="users" style={styles.icon} />
+                <Text style={styles.drawerItemText}>Gerenciar Usuários</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowActionsDrawer(false)} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>Fechar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
     </View>
+   
   );
 };
 

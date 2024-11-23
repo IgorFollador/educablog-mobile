@@ -58,7 +58,17 @@ const UserManagementPage = () => {
       fetchUsers(currentPage, searchQuery);
     }
   }, [session, status, currentPage, searchQuery, fetchUsers]);
-
+  
+  useEffect(() => {
+    if (status === 'authenticated' && session?.token) {
+      const unsubscribe = navigation.addListener('focus', () => {
+        fetchUsers(currentPage, searchQuery);
+      });
+  
+      return unsubscribe;
+    }
+  }, [navigation, fetchUsers, currentPage, searchQuery, session?.token, status]);  
+  
   const handleSearch = (query: string) => {
     setCurrentPage(1);
     setSearchQuery(query);
@@ -81,19 +91,7 @@ const UserManagementPage = () => {
 
   const confirmDelete = async (userId: string) => {
     try {
-      const userToDelete = users.find((user) => user.id === userId);
-      if (!userToDelete) {
-        Alert.alert('Erro', 'Usuário não encontrado.');
-        return;
-      }
-  
       await axios.delete(`${process.env.PUBLIC_API_URL}/usuario/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${session?.token}`,
-        },
-      });
-  
-      await axios.delete(`${process.env.PUBLIC_API_URL}/pessoa/${userToDelete.pessoa.id}`, {
         headers: {
           Authorization: `Bearer ${session?.token}`,
         },
@@ -107,13 +105,11 @@ const UserManagementPage = () => {
       setError('Erro ao excluir. Verifique sua conexão e tente novamente.');
     }
   };
-  
 
   const renderItem = ({ item }: { item: User }) => (
     <View style={{ alignItems: 'center', marginHorizontal: 16 }}>
       <UserList
         users={[item]}
-        isAdmin
         isLoading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}

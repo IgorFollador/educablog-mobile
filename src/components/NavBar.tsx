@@ -40,7 +40,7 @@ const Navbar = ({ showLoginButton }: NavbarProps) => {
   const isPostPage = route.name === 'PostPage';
   const isUserPage = route.name === 'UserPage'; 
   const isViewPostPage = route.name === 'ViewPostPage'; 
-  const isAuthenticated = status === 'authenticated'; // Verifica se o usuário está autenticado
+  const isAuthenticated = status === 'authenticated';
 
   return (
     <View style={styles.navbarContainer}>
