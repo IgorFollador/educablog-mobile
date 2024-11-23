@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useRoute, useNavigation, NavigationProp } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { removeHtmlTags } from '../../services/Utils';
+import { useAuth } from '../../context/AuthContext';
 
 // Tipo para os parâmetros da rota
 interface RootStackParamList {
@@ -28,7 +29,7 @@ const ViewPostPage = () => {
   const [error, setError] = useState<string>('');
   const route = useRoute();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { id, isAdmin } = route.params as { id: string, isAdmin: boolean };
+  const { id } = route.params as { id: string };
   const apiUrl = Constants.expoConfig.extra.PUBLIC_API_URL;
 
   useEffect(() => {
@@ -46,8 +47,10 @@ const ViewPostPage = () => {
     }
   };
 
+  const { isAdmin } = useAuth();
+
   const handleBack = () => {
-    isAdmin ? navigation.navigate('PostManagementPage') : navigation.navigate('HomePage');
+    isAdmin() ? navigation.navigate('PostManagementPage') : navigation.navigate('HomePage');
   };
 
   if (loading) {
