@@ -4,7 +4,7 @@ import { useNavigation, NavigationProp, useRoute, RouteProp } from '@react-navig
 import axios from 'axios';
 import { z } from 'zod';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Picker } from '@react-native-picker/picker';  // Importando o Picker
+import { Picker } from '@react-native-picker/picker';
 import { ScrollView } from 'react-native-gesture-handler';
 
 type UserPageNavigationProp = NavigationProp<RootStackParamList, 'UserPage'>;
@@ -17,7 +17,7 @@ const UserPage = () => {
   const [pessoaId, setPessoaId] = useState<string>('');
   const [login, setLogin] = useState<string>('');
   const [senha, setSenha] = useState<string>('');
-  const [tipo, setTipo] = useState<string>('aluno');  // Inicializa com 'aluno'
+  const [tipo, setTipo] = useState<string>('aluno');
   const [email, setEmail] = useState<string>('');
   const [nome, setNome] = useState<string>('');
   const [cpf, setCPF] = useState<string>('');
@@ -27,10 +27,9 @@ const UserPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Validação com Zod
   const userSchema = z.object({
-    login: z.string().nonempty('Login é obrigatório'),
-    senha: z.string().nonempty('Senha é obrigatória'),
+    login: z.string().optional().nullable(),
+    senha: z.string().optional().nullable(), 
     tipo: z.enum(['aluno', 'professor', 'admin']),
     pessoa: z.object({
       id: z.string().optional().nullable(),
@@ -64,13 +63,11 @@ const UserPage = () => {
   const formatDate = (date: string) => {
     if (!date) return '';
   
-    // Verifica se a data está no formato yyyy-MM-dd
     if (date.includes('-')) {
       const [year, month, day] = date.split('-');
       return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
     }
   
-    // Caso seja um input sendo digitado (dd/MM/yyyy)
     let value = date.replace(/\D/g, '');
   
     if (value.length <= 2) {
@@ -84,7 +81,6 @@ const UserPage = () => {
     return value;
   };
   
-
   const handleCPFChange = (value: string) => setCPF(formatCPF(value));
   const handlePhoneChange = (value: string) => setTelefone(formatPhone(value));
   const handleDateChange = (value: string) => setDataNascimento(formatDate(value));
@@ -100,16 +96,16 @@ const UserPage = () => {
 
   const handleRegister = async () => {
     setError('');
-    setLoading(true); 
+    setLoading(true);
   
     const formattedDate = formatDateToAPI(dataNascimento);
   
     const userData = {
-      login,
-      senha,
+      login: login || undefined,
+      senha: senha || undefined,
       tipo,
       pessoa: {
-        id: pessoaId || null, 
+        id: pessoaId || undefined,
         cpf: cleanCPF(cpf),
         nome,
         email,
@@ -117,12 +113,20 @@ const UserPage = () => {
         telefone: cleanPhone(telefone),
       },
     };
+    
+    if (senha) {
+      userData.senha = senha;
+    }
+
+    if (login) {
+      userData.login = login;
+    }
   
     const validation = userSchema.safeParse(userData);
   
     if (!validation.success) {
       const errors = validation.error.issues.map((issue) => issue.message).join(', ');
-      setError(errors); 
+      setError(errors);
       setLoading(false);
       return;
     }
@@ -134,13 +138,12 @@ const UserPage = () => {
         setLoading(false);
         return;
       }
-
+  
       let result;
   
       if (userId) {
         console.log('Chamou o alterar:', validation.data);
-
-        // Se existir um userId, estamos editando
+  
         result = await axios.put(
           `${process.env.PUBLIC_API_URL}/usuario/${userId}`, validation.data,
           {
@@ -149,8 +152,7 @@ const UserPage = () => {
         );
       } else {
         console.log('Chamou o criar:', validation.data);
-
-        // Se não existir userId, estamos criando um novo usuário
+  
         result = await axios.post(
           `${process.env.PUBLIC_API_URL}/usuario`, validation.data,
           {
@@ -163,8 +165,7 @@ const UserPage = () => {
   
       if (result.status === 201) {
         Alert.alert('Sucesso', 'Usuário criado com sucesso!');
-        
-        // Limpar os campos:
+  
         setPessoaId('');
         setLogin('');
         setSenha('');
@@ -185,13 +186,13 @@ const UserPage = () => {
         ]);
       }
     } catch (err) {
-      setLoading(false); // Em caso de erro, definimos loading como falso
+      setLoading(false);
   
       if (axios.isAxiosError(err)) {
-        // Aqui garantimos que os erros de resposta (status) sejam tratados corretamente
         if (err.response) {
           switch (err.response.status) {
             case 400:
+              console.log('Dados inválidos:', err.response.data);
               setError('Dados inválidos. Verifique os campos e tente novamente.');
               break;
             case 409:
@@ -202,25 +203,22 @@ const UserPage = () => {
               setError('Erro no servidor. Por favor, tente novamente mais tarde.');
               break;
             default:
-              console.log('Erro no desconhecido:', err.response.data);
+              console.log('Erro desconhecido:', err.response.data);
               setError('Erro desconhecido. Por favor, tente novamente.');
           }
         } else if (err.request) {
-          // Caso haja problemas de rede ou não obtenha resposta do servidor
           setError('Erro na conexão. Verifique sua internet e tente novamente.');
         } else {
-          // Outros erros desconhecidos
           setError(`Erro desconhecido: ${err.message}`);
         }
       } else {
-        // Caso o erro não seja do axios
         setError('Erro desconhecido. Por favor, tente novamente.');
       }
     }
-  };  
-
+  };
+  
   const handleCancel = () => {
-    navigation.goBack(); // Volta para a página anterior
+    navigation.goBack();
   };
 
   useEffect(() => {
@@ -232,37 +230,45 @@ const UserPage = () => {
         try {
           const token = await AsyncStorage.getItem('userToken');
           if (!token) {
-            setLoading(false); // Se não houver token, encerre o loading
+            setLoading(false);
             return;
           }
-    
+  
           const response = await axios.get(`${process.env.PUBLIC_API_URL}/usuario/${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
-    
+  
           const user = response.data;
   
           setPessoaId(user.pessoa.id || '');
-          setLogin(user.login || '');
-          setSenha(user.senha || ''); // Preenchendo corretamente a senha
+          setLogin(undefined);
+          setSenha(undefined);  
           setTipo(user.tipo || 'aluno');
           setEmail(user.pessoa.email || '');
           setNome(user.pessoa.nome || '');
           setCPF(formatCPF(user.pessoa.cpf || ''));
           setTelefone(formatPhone(user.pessoa.telefone || ''));
           setDataNascimento(formatDate(user.pessoa.dataNascimento || ''));
-    
+          
         } catch (err) {
           console.error('Erro ao carregar os dados do usuário:', err);
           setError('Erro ao carregar os dados do usuário.');
         } finally {
-          setLoading(false); // Garantir que o loading seja desligado após o fetch
+          setLoading(false);
         }
       };
-    
+  
       fetchUser();
     }
-  }, [userId]);  
+  }, [userId]);
+  
+  const handleLoginChange = (newLogin: string) => {
+    setLogin(newLogin);
+  };  
+
+  const handleSenhaChange = (newSenha: string) => {
+    setSenha(newSenha);
+  };  
 
   return (
     <ScrollView>
@@ -271,24 +277,44 @@ const UserPage = () => {
           <Text style={styles.title}>Editar Usuário</Text>
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
+          <Text style={styles.label}>Login:</Text>
           <TextInput
             style={[styles.input, focusedField === 'login' && styles.focusedInput]}
             placeholder="Login"
-            value={login}
-            onChangeText={setLogin}
+            value={
+              userId && login === undefined && focusedField !== 'login'
+                ? '******' 
+                : login 
+            }
+            onChangeText={setLogin} 
             onFocus={() => setFocusedField('login')}
-            onBlur={() => !login && setFocusedField(null)}
+            onBlur={() => {
+              if (!login && userId) setLogin(undefined); 
+              setFocusedField(null);
+            }}
+            secureTextEntry 
           />
 
+          <Text style={styles.label}>Senha:</Text>
           <TextInput
             style={[styles.input, focusedField === 'senha' && styles.focusedInput]}
             placeholder="Senha"
-            value={senha}
-            onChangeText={setSenha}
+            value={
+              userId && senha === undefined && focusedField !== 'senha'
+                ? '******' 
+                : senha 
+            }
+            onChangeText={setSenha} 
             onFocus={() => setFocusedField('senha')}
-            onBlur={() => !senha && setFocusedField(null)}
+            onBlur={() => {
+              if (!senha && userId) setSenha(undefined);
+              setFocusedField(null);
+            }}
+            secureTextEntry 
           />
 
+
+          <Text style={styles.label}>E-mail:</Text>
           <TextInput
             style={[styles.input, focusedField === 'email' && styles.focusedInput]}
             placeholder="Email"
@@ -297,8 +323,10 @@ const UserPage = () => {
             onFocus={() => setFocusedField('email')}
             onBlur={() => !email && setFocusedField(null)}
             keyboardType="email-address"
+            secureTextEntry={true}
           />
 
+          <Text style={styles.label}>Nome Completo:</Text>
           <TextInput
             style={[styles.input, focusedField === 'nome' && styles.focusedInput]}
             placeholder="Nome Completo"
@@ -308,6 +336,7 @@ const UserPage = () => {
             onBlur={() => !nome && setFocusedField(null)}
           />
 
+          <Text style={styles.label}>CPF:</Text>  
           <TextInput
             style={[styles.input, focusedField === 'cpf' && styles.focusedInput]}
             placeholder="CPF"
@@ -319,17 +348,19 @@ const UserPage = () => {
             keyboardType="numeric"
           />
 
+          <Text style={styles.label}>Telefone:</Text>  
           <TextInput
-            style={[styles.input, focusedField === 'phone' && styles.focusedInput]}
+            style={[styles.input, focusedField === 'telefone' && styles.focusedInput]}
             placeholder="Telefone"
             value={telefone}
             onChangeText={handlePhoneChange}
-            onFocus={() => setFocusedField('phone')}
+            onFocus={() => setFocusedField('telefone')}
             onBlur={() => !telefone && setFocusedField(null)}
             maxLength={15}
             keyboardType="phone-pad"
           />
 
+          <Text style={styles.label}>Data de nascimento:</Text>  
           <TextInput
             style={[styles.input, focusedField === 'date' && styles.focusedInput]}
             placeholder="Data de nascimento"
@@ -341,16 +372,19 @@ const UserPage = () => {
             keyboardType="numeric"
           />
 
-          <Picker
-            selectedValue={tipo}
-            onValueChange={(itemValue) => setTipo(itemValue)}
-            style={[styles.input, focusedField === 'tipo' && styles.focusedInput]}
-          >
-            <Picker.Item label="Aluno" value="aluno" />
-            <Picker.Item label="Professor" value="professor" />
-            <Picker.Item label="Admin" value="admin" />
-          </Picker>
-
+          <Text style={styles.label}>Tipo de usuário:</Text>  
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={tipo}
+              onValueChange={(itemValue) => setTipo(itemValue)}
+              style={[styles.input, focusedField === 'tipo' && styles.focusedInput]}
+            >
+              <Picker.Item label="Aluno" value="aluno" />
+              <Picker.Item label="Professor" value="professor" />
+              <Picker.Item label="Admin" value="admin" />
+            </Picker>
+          </View>
+ 
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.button, styles.registerButton]}
@@ -372,6 +406,11 @@ const UserPage = () => {
 };
 
 const styles = StyleSheet.create({
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
   container: {
     flex: 1,
     padding: 20,
@@ -425,6 +464,17 @@ const styles = StyleSheet.create({
   },
   spaceBelow: {
     height: 70,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginBottom: 10,
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 50, 
+    fontSize: 16,
   },
 });
 
