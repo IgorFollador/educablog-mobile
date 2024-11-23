@@ -16,7 +16,8 @@ export const signIn = async (email: string, password: string) => {
 
     if (response.data && response.data.token) {
       console.log('Token recebido:', response.data.token);
-      return { token: response.data.token };
+      console.log('Tipo Usuário recebido:', response.data.tipo);
+      return { token: response.data.token, tipo: response.data.tipo };
     } else {
       console.log('Autenticação falhou: Nenhum token retornado');
       return null;

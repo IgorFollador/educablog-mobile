@@ -18,7 +18,6 @@ type User = {
 
 interface UserListProps {
   users: User[];
-  isAdmin?: boolean;
   isLoading?: boolean;
   onEdit?: (userId: string) => void;
   onDelete?: (userId: string) => void;
@@ -45,7 +44,6 @@ const formatDate = (date: string) => {
 
 const UserList: React.FC<UserListProps> = ({
   users = [],
-  isAdmin = false,
   isLoading = false,
   onEdit,
   onDelete,
@@ -85,22 +83,21 @@ const UserList: React.FC<UserListProps> = ({
 
           </View>
   
-          {isAdmin && (
-            <View style={styles.actions}>
-              <TouchableOpacity
-                onPress={() => onEdit && onEdit(user.id)}
-                style={styles.editButton}
-              >
-                <Text style={styles.buttonText}>Editar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => onDelete && onDelete(user.id)}
-                style={styles.deleteButton}
-              >
-                <Text style={styles.buttonText}>Deletar</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+          <View style={styles.actions}>
+            <TouchableOpacity
+              onPress={() => onEdit && onEdit(user.id)}
+              style={styles.editButton}
+            >
+              <Text style={styles.buttonText}>Editar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => onDelete && onDelete(user.id)}
+              style={styles.deleteButton}
+            >
+              <Text style={styles.buttonText}>Deletar</Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
       ))}
     </View>

@@ -30,7 +30,7 @@ const UserPage = () => {
   const userSchema = z.object({
     login: z.string().optional().nullable(),
     senha: z.string().optional().nullable(), 
-    tipo: z.enum(['aluno', 'professor', 'admin']),
+    tipo: z.enum(['aluno', 'professor']),
     pessoa: z.object({
       id: z.string().optional().nullable(),
       email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
@@ -381,7 +381,6 @@ const UserPage = () => {
             >
               <Picker.Item label="Aluno" value="aluno" />
               <Picker.Item label="Professor" value="professor" />
-              <Picker.Item label="Admin" value="admin" />
             </Picker>
           </View>
  
