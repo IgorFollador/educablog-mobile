@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Text, TextInput, View, ScrollView, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native';
+import { Image, Text, TextInput, View, ScrollView, ActivityIndicator, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 import { useNavigation, useRoute, NavigationProp, RouteProp } from '@react-navigation/native';
 import { z } from 'zod';
@@ -131,23 +131,68 @@ const PostPage = () => {
         return;
       }
 
+      let result;
+
       if (postId) {
         // Editar post existente
-        await axios.put(`${process.env.PUBLIC_API_URL}/posts/${postId}`, validation.data, {
+        result = await axios.put(`${process.env.PUBLIC_API_URL}/posts/${postId}`, validation.data, {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
         // Criar novo post
-        await axios.post(`${process.env.PUBLIC_API_URL}/posts`, validation.data, {
+        result = await axios.post(`${process.env.PUBLIC_API_URL}/posts`, validation.data, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
-      navigation.navigate('PostManagementPage');
-    } catch (err) {
-      console.error('Erro ao salvar postagem:', err);
-      setError('Erro ao salvar postagem. Verifique sua conexão e tente novamente.');
-    } finally {
+
       setLoading(false);
+
+      if (result.status === 201) {
+        Alert.alert('Sucesso', 'Post criado com sucesso!');
+
+        setTitle('');
+        setDescription('');
+        setImageUrl('');
+        setIsActive(true);
+      }
+
+      if (result.status === 200) {
+        Alert.alert('Sucesso', 'Post atualizado com sucesso.', [
+          {
+            text: 'OK',
+            onPress: () => navigation.goBack(),
+          },
+        ]);
+      }
+    } catch (err) {
+      setLoading(false);
+  
+      if (axios.isAxiosError(err)) {
+        if (err.response) {
+          switch (err.response.status) {
+            case 400:
+              console.log('Dados inválidos:', err.response.data);
+              setError('Dados inválidos. Verifique os campos e tente novamente.');
+              break;
+            case 409:
+              setError('Erro: Este título de Post já está em uso.');
+              break;
+            case 500:
+              console.log('Erro no servidor:', err.response.data);
+              setError('Erro no servidor. Por favor, tente novamente mais tarde.');
+              break;
+            default:
+              console.log('Erro desconhecido:', err.response.data);
+              setError('Erro desconhecido. Por favor, tente novamente.');
+          }
+        } else if (err.request) {
+          setError('Erro na conexão. Verifique sua internet e tente novamente.');
+        } else {
+          setError(`Erro desconhecido: ${err.message}`);
+        }
+      } else {
+        setError('Erro desconhecido. Por favor, tente novamente.');
+      }
     }
   };
 
@@ -157,6 +202,7 @@ const PostPage = () => {
         <Text style={styles.title}>{postId ? 'Editar Postagem' : 'Criar Nova Postagem'}</Text>
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
+        <Text style={styles.label}>Título:</Text>
         <TextInput
           style={[styles.input, focusedField === 'titulo' && styles.focusedInput]}
           placeholder="Título"
@@ -166,6 +212,7 @@ const PostPage = () => {
           onBlur={() => !title && setFocusedField(null)}
         />
 
+        <Text style={styles.label}>Descrição:</Text>
         <TextInput
           style={[styles.input, focusedField === 'descricao' && styles.focusedInput]}
           placeholder="Descrição"
@@ -176,6 +223,7 @@ const PostPage = () => {
           onBlur={() => !description && setFocusedField(null)}
         />
 
+        <Text style={styles.label}>URL da Imagem:</Text>
         <TextInput
           style={[styles.input, focusedField === 'imagemUrl' && styles.focusedInput]}
           placeholder="URL da Imagem (opcional)"
@@ -186,6 +234,7 @@ const PostPage = () => {
         />
         {imageUrl ? <Image source={{ uri: imageUrl }} style={styles.imagePreview} /> : null}
 
+        <Text style={styles.label}>Categoria:</Text>
         <View style={[styles.pickerContainer, focusedField === 'categoria' && styles.focusedInput]}>
           <Picker
             selectedValue={selectedCategoryId}
@@ -199,6 +248,7 @@ const PostPage = () => {
           </Picker>
         </View>
 
+        <Text style={styles.label}>Status:</Text>  
         <TouchableOpacity onPress={() => setIsActive(!isActive)} style={styles.toggleContainer}>
           <View style={[styles.toggle, { backgroundColor: isActive ? '#34D399' : '#E5E7EB' }]} />
           <Text style={styles.toggleText}>{isActive ? 'Ativo' : 'Inativo'}</Text>
@@ -228,6 +278,11 @@ const PostPage = () => {
 };
 
 const styles = StyleSheet.create({
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
   container: {
     flexGrow: 1,
     justifyContent: 'center',
