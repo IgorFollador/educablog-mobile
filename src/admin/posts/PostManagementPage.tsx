@@ -67,6 +67,16 @@ const PostManagementPage = () => {
       fetchPosts(currentPage, searchQuery);
     }
   }, [session, status, currentPage, searchQuery, fetchPosts]);
+    
+  useEffect(() => {
+    if (status === 'authenticated' && session?.token) {
+      const unsubscribe = navigation.addListener('focus', () => {
+        fetchPosts(currentPage, searchQuery);
+      });
+  
+      return unsubscribe;
+    }
+  }, [navigation, fetchPosts, currentPage, searchQuery, session?.token, status]);  
 
   const handleEdit = (postId: string) => {
     navigation.navigate('PostPage', { postId });
