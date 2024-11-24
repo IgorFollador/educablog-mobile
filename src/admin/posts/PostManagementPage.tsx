@@ -140,7 +140,6 @@ const PostManagementPage = () => {
       <PostList
         posts={[item]}
         isLoading={loading}
-        isAdmin={isAdmin()}
         onEdit={handleEdit}
         onDelete={() => handleDelete(item.id)}
       />

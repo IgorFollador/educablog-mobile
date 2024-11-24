@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Text, TouchableOpacity, View, Image, FlatList, StyleSheet } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { removeHtmlTags } from '../services/Utils';
+import { useAuth } from '../context/AuthContext';
 
 type Post = {
   id: string;
@@ -27,7 +28,6 @@ type Post = {
 
 interface PostListProps {
   posts: Post[];
-  isAdmin?: boolean;
   isLoading?: boolean;
   onEdit?: (postId: string) => void;
   onDelete?: (postId: string) => void;
@@ -35,17 +35,17 @@ interface PostListProps {
 
 const PostList: React.FC<PostListProps> = ({
   posts = [],
-  isAdmin = false,
   isLoading = false,
   onEdit,
   onDelete,
 }) => {
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { isAdmin } = useAuth();
 
   const handlePostClick = (postId: string) => {
     console.log('Clicou no post:', postId);
-    navigation.navigate('ViewPostPage', { id: postId, isAdmin });
+    navigation.navigate('ViewPostPage', { id: postId});
   };
 
   const truncateDescription = (description: string, length: number) => {
@@ -100,7 +100,7 @@ const PostList: React.FC<PostListProps> = ({
             Publicado em: {new Date(post.dataCriacao).toLocaleDateString()}
           </Text>
 
-          {isAdmin && (
+          {isAdmin() && (
             <View style={styles.adminActionsContainer}>
               <View style={styles.buttonGroup}>
                 <TouchableOpacity
