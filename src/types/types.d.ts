@@ -6,7 +6,7 @@ declare global {
       PostManagementPage: undefined;
       PostPage: { postId: string | undefined };
       UserPage: { userId: string | undefined };
-      ViewPostPage: { id: string, isAdmin?: boolean };
+      ViewPostPage: { id: string };
       UserManagementPage: { isProfessor?: boolean };
     };
   }
