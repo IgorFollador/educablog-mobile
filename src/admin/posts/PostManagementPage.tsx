@@ -24,7 +24,7 @@ type Post = {
 const PostManagementPage = () => {
   const { data: session, status } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -34,65 +34,68 @@ const PostManagementPage = () => {
 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-  const fetchPosts = useCallback(async (page: number, query: string = '') => {
-    setLoading(true);
-    setError('');
-    const postsLimit = '10';
-  
-    try {
-      const response = query
-        ? await axios.get(`${process.env.PUBLIC_API_URL}/posts/admin/search`, {
-            params: { query, limite: parseInt(postsLimit, 10), pagina: page },
-            headers: {
-              Authorization: `Bearer ${session?.token}`,
-            },
-          })
-        : await axios.get(`${process.env.PUBLIC_API_URL}/posts/admin`, {
-            params: { limite: parseInt(postsLimit, 10), pagina: page },
-            headers: {
-              Authorization: `Bearer ${session?.token}`,
-            },
-          });
-  
+  // Controle para evitar múltiplas chamadas
+  const isFetching = useRef(false);
+
+  // Função para buscar posts
+  const fetchPosts = useCallback(
+    async (page: number, query: string = '') => {
+      if (!session?.token || isFetching.current || loading) return; // Previne chamadas desnecessárias
+
+      isFetching.current = true;
+      setLoading(true);
+      setError('');
+      const postsLimit = '10';
+
+      try {
+        const endpoint = query
+          ? `${process.env.PUBLIC_API_URL}/posts/admin/search`
+          : `${process.env.PUBLIC_API_URL}/posts/admin`;
+        const response = await axios.get(endpoint, {
+          params: { query, limite: parseInt(postsLimit, 10), pagina: page },
+          headers: { Authorization: `Bearer ${session.token}` },
+        });
+
         setPosts(response.data || []);
-
-      setTotalPages(Math.ceil(response.headers['x-total-count'] / parseInt(postsLimit, 10)));
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const message =
-          err.response?.status === 404
-            ? 'Nenhum post encontrado.'
-            : 'Erro ao carregar posts. Tente novamente.';
-        setError(message);
-      } else {
-        setError('Erro ao carregar posts. Tente novamente.');
+        setTotalPages(Math.ceil(response.headers['x-total-count'] / parseInt(postsLimit, 10)));
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          const message =
+            err.response?.status === 404
+              ? 'Nenhum post encontrado.'
+              : 'Erro ao carregar posts. Tente novamente.';
+          setError(message);
+        } else {
+          setError('Erro ao carregar posts. Tente novamente.');
+        }
+        setPosts([]);
+      } finally {
+        setLoading(false);
+        isFetching.current = false;
       }
-      setPosts([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [session?.token]);  
+    },
+    [session?.token, loading] // Apenas depende do token da sessão e do estado de carregamento
+  );
 
+  // Atualiza os posts apenas uma vez ao iniciar
   useEffect(() => {
     if (status === 'authenticated' && session?.token) {
       fetchPosts(currentPage, searchQuery);
     }
-  }, [session, status, currentPage, searchQuery, fetchPosts]);
-    
+  }, [status, session?.token, currentPage, searchQuery]); // Mantém apenas dependências necessárias
+
+  // Listener para recarregar posts ao voltar para a tela
   useEffect(() => {
-    if (status === 'authenticated' && session?.token) {
-      const unsubscribe = navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (status === 'authenticated' && session?.token && !isFetching.current) {
         fetchPosts(currentPage, searchQuery);
-      });
-  
-      return unsubscribe;
-    }
-  }, [navigation, fetchPosts, currentPage, searchQuery, session?.token, status]);  
+      }
+    });
 
-  const handleEdit = (postId: string) => {
-    navigation.navigate('PostPage', { postId });
-  };
+    return unsubscribe;
+  }, [navigation, session?.token, status, currentPage, searchQuery]); // Reduz dependências desnecessárias
 
+  // Função de exclusão de posts
   const handleDelete = (postId: string) => {
     Alert.alert(
       "Confirmação de exclusão",
@@ -100,32 +103,24 @@ const PostManagementPage = () => {
       [
         { text: "Cancelar", style: "cancel" },
         {
-          text: "Excluir", 
-          onPress: () => handleConfirmDelete(postId),
-          style: "destructive"
-        }
+          text: "Excluir",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await axios.delete(`${process.env.PUBLIC_API_URL}/posts/${postId}`, {
+                headers: { Authorization: `Bearer ${session?.token}` },
+              });
+              setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+            } catch {
+              setError('Erro ao deletar postagem. Verifique sua conexão e tente novamente.');
+            } finally {
+              setLoading(false);
+            }
+          },
+          style: "destructive",
+        },
       ]
     );
-  };
-
-  const handleConfirmDelete = async (postId: string) => {
-    try {
-      setLoading(true); // Adiciona o estado de carregamento
-      console.log('Excluindo postagem: ', postId);
-      await axios.delete(`${process.env.PUBLIC_API_URL}/posts/${postId}`, {
-        headers: {
-          Authorization: `Bearer ${session?.token}`,
-        },
-      });
-  
-      // Atualiza o estado dos posts após a exclusão
-      setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
-    } catch (err) {
-      console.error('Erro ao deletar postagem:', err);
-      setError('Erro ao deletar postagem. Verifique sua conexão e tente novamente.');
-    } finally {
-      setLoading(false); // Finaliza o estado de carregamento
-    }
   };
 
   const handleSearch = (query: string) => {
@@ -133,33 +128,30 @@ const PostManagementPage = () => {
     setSearchQuery(query);
   };
 
-  const { isAdmin } = useAuth();
-
-  const renderItem = ({ item }: { item: Post }) => (
-    <View style={{ alignItems: 'center', marginHorizontal: 16 }}>
-      <PostList
-        posts={[item]}
-        isLoading={loading}
-        onEdit={handleEdit}
-        onDelete={() => handleDelete(item.id)}
-      />
-    </View>
-  );
-
   const handleScroll = (event: any) => {
-    const currentScrollPos = event.nativeEvent.contentOffset.y;
-    setIsVisible(currentScrollPos > 200); // Botão aparece após rolar 200px
+    setIsVisible(event.nativeEvent.contentOffset.y > 200);
   };
 
   const scrollToTop = () => {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
+  const renderItem = ({ item }: { item: Post }) => (
+    <View style={{ alignItems: 'center', marginHorizontal: 16 }}>
+      <PostList
+        posts={[item]}
+        isLoading={loading}
+        onEdit={(postId) => navigation.navigate('PostPage', { postId })}
+        onDelete={() => handleDelete(item.id)}
+      />
+    </View>
+  );
+
   return (
     <View style={{ flex: 1 }}>
       <FlatList
         ref={flatListRef}
-        data={[...posts]}
+        data={posts}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ListHeaderComponent={
@@ -171,14 +163,13 @@ const PostManagementPage = () => {
           </View>
         }
         ListEmptyComponent={
-          !loading && !posts.length ? <Text style={styles.errorText}>Nenhum post encontrado.</Text> : null
+          !loading && !posts.length && <Text style={styles.errorText}>Nenhum post encontrado.</Text>
         }
         ListFooterComponent={<View style={{ height: 60 }} />}
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}
       />
-
       <ScrollTopButton isVisible={isVisible} scrollToTop={scrollToTop} />
     </View>
   );
