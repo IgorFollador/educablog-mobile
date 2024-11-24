@@ -38,7 +38,7 @@ const PostManagementPage = () => {
     setLoading(true);
     setError('');
     const postsLimit = '10';
-
+  
     try {
       const response = query
         ? await axios.get(`${process.env.PUBLIC_API_URL}/posts/admin/search`, {
@@ -53,16 +53,25 @@ const PostManagementPage = () => {
               Authorization: `Bearer ${session?.token}`,
             },
           });
+  
+        setPosts(response.data || []);
 
-      setPosts(response.data || []);
       setTotalPages(Math.ceil(response.headers['x-total-count'] / parseInt(postsLimit, 10)));
     } catch (err) {
-      console.error('Erro ao buscar posts:', err);
-      setError('Erro ao carregar as postagens.');
+      if (axios.isAxiosError(err)) {
+        const message =
+          err.response?.status === 404
+            ? 'Nenhum post encontrado.'
+            : 'Erro ao carregar posts. Tente novamente.';
+        setError(message);
+      } else {
+        setError('Erro ao carregar posts. Tente novamente.');
+      }
+      setPosts([]);
     } finally {
       setLoading(false);
     }
-  }, [session?.token]);
+  }, [session?.token]);  
 
   useEffect(() => {
     if (status === 'authenticated' && session?.token) {
@@ -163,7 +172,7 @@ const PostManagementPage = () => {
           </View>
         }
         ListEmptyComponent={
-          !loading && !posts.length ? <Text style={styles.errorText}>Nenhum post encontrado</Text> : null
+          !loading && !posts.length ? <Text style={styles.errorText}>Nenhum post encontrado.</Text> : null
         }
         ListFooterComponent={<View style={{ height: 60 }} />}
         showsVerticalScrollIndicator={false}

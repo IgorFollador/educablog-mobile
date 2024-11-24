@@ -97,7 +97,7 @@ const Footer = () => {
               </TouchableOpacity>
               <TouchableOpacity onPress={handleNavigateToUserPage} style={styles.drawerItem}>
                 <Icon name="user-plus" style={styles.icon} />
-                <Text style={styles.drawerItemText}>Adicionar Usuário</Text>
+                <Text style={styles.drawerItemText}>Adicionar Professor/Aluno</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleNavigateToTeacherManagementPage(true)} style={styles.drawerItem}>
                 <Icon name="users" style={styles.icon} />
