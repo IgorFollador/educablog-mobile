@@ -71,6 +71,8 @@ const PostList: React.FC<PostListProps> = ({
       keyExtractor={(item) => item.id}
       onEndReachedThreshold={0.5}
       showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ flexGrow: 1 }} 
+      style={{ flex: 1, width: '100%' }} 
       ListFooterComponent={isLoading ? <Text style={styles.loadingText}>Carregando Postagens...</Text> : null}
       renderItem={({ item: post }) => (
         <TouchableOpacity
@@ -79,14 +81,14 @@ const PostList: React.FC<PostListProps> = ({
         >
           <Text style={styles.postTitle}>{post.titulo}</Text>
           <Text style={styles.postDescription}>{truncateDescription(post.descricao, 150)}</Text>
-
+  
           {post.imagemUrl && (
             <Image
               source={{ uri: post.imagemUrl }}
               style={styles.postImage}
             />
           )}
-
+  
           <Text style={styles.postCategory}>
             {post.categoria && <>Categoria: {post.categoria.nome.toUpperCase()}</>}
             {post.usuarioCriacao?.pessoa?.nome && (
@@ -99,7 +101,7 @@ const PostList: React.FC<PostListProps> = ({
           <Text style={styles.postDate}>
             Publicado em: {new Date(post.dataCriacao).toLocaleDateString()}
           </Text>
-
+  
           {isAdmin() && (
             <View style={styles.adminActionsContainer}>
               <View style={styles.buttonGroup}>
@@ -116,7 +118,7 @@ const PostList: React.FC<PostListProps> = ({
                   <Text style={styles.buttonText}>Deletar</Text>
                 </TouchableOpacity>
               </View>
-
+  
               <View style={styles.statusIndicatorContainer}>
                 <View
                   style={[styles.statusIndicator, post.ativo ? styles.activeStatus : styles.inactiveStatus]}
@@ -133,7 +135,7 @@ const PostList: React.FC<PostListProps> = ({
       )}
     />
   );
-};
+}  
 
 const styles = StyleSheet.create({
   postContainer: {
