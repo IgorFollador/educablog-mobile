@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator, FlatList } from 'react-native';
 import axios from 'axios';
 import { useNavigation, useRoute, useFocusEffect, RouteProp, NavigationProp } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import UserList from '../../components/UserList';
 import ScrollTopButton from '../../components/ScrollToTopButton';
+import SearchBar from '../../components/SearchBar';
 
 type User = {
   id: string;
@@ -26,53 +27,57 @@ type UserPageRouteProp = RouteProp<RootStackParamList, 'UserManagementPage'>;
 const UserManagementPage = () => {
   const { data: session, status } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>(''); // Query específica por tela
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [isVisible, setIsVisible] = useState(false);
   const flatListRef = useRef<FlatList>(null);
   const { params } = useRoute<UserPageRouteProp>();
   const isProfessor = params?.isProfessor;
+  const [isVisible, setIsVisible] = useState(false);
 
-  const fetchUsers = useCallback(async (page: number, query: string = '') => {
+  const fetchUsers = useCallback(async (query: string = '') => {
     setLoading(true);
     setError('');
-    const usersLimit = '10';
+    const userTipo = isProfessor ? 'professor' : 'aluno';
 
     try {
-      const userType = isProfessor ? 'professor' : 'aluno';
-      const response = await axios.get(`${process.env.PUBLIC_API_URL}/usuario/tipoUsuario`, {
-        params: { tipo: userType },
+      const response = await axios.get(`${process.env.PUBLIC_API_URL}/usuario/search`, {
+        params: { tipo: userTipo, query: query.trim() || undefined },
         headers: {
           Authorization: `Bearer ${session?.token}`,
         },
       });
 
-      setTotalPages(Math.ceil(response.headers['x-total-count'] / parseInt(usersLimit, 10)));
-      setUsers(response.data.usuarios || []);
+      setUsers(response.data || []);
     } catch (err) {
-      console.error('Erro ao buscar usuários:', err);
-      setError('Erro ao carregar os usuários.');
+      if (axios.isAxiosError(err)) {
+        const message =
+          err.response?.status === 404
+            ? 'Nenhum usuário encontrado.'
+            : 'Erro ao carregar usuários. Tente novamente.';
+        setError(message);
+      } else {
+        setError('Erro ao carregar usuários. Tente novamente.');
+      }
+      setUsers([]);
     } finally {
       setLoading(false);
     }
   }, [session?.token, isProfessor]);
 
-  // Carrega os usuários ao focar na tela ou mudar o parâmetro `isProfessor`
   useFocusEffect(
     useCallback(() => {
       if (status === 'authenticated' && session?.token) {
-        fetchUsers(currentPage, searchQuery);
+        setSearchQuery('');
+        fetchUsers();
       }
-    }, [status, session?.token, currentPage, searchQuery, fetchUsers])
+    }, [status, session?.token, fetchUsers])
   );
 
   const handleSearch = (query: string) => {
-    setCurrentPage(1);
     setSearchQuery(query);
+    fetchUsers(query);
   };
 
   const handleEdit = (userId: string) => {
@@ -101,8 +106,7 @@ const UserManagementPage = () => {
       setUsers(users.filter((user) => user.id !== userId));
       Alert.alert('Sucesso', 'Usuário excluído com sucesso.');
     } catch (err) {
-      console.error('Erro ao deletar usuário', err.response?.data || err);
-      setError('Erro ao excluir. Verifique sua conexão e tente novamente.');
+      setError('Erro ao excluir. Tente novamente.');
     }
   };
 
@@ -138,12 +142,17 @@ const UserManagementPage = () => {
             <Text style={styles.title}>
               Gerenciamento de {isProfessor ? 'Professores' : 'Alunos'}
             </Text>
+            <SearchBar onSearch={handleSearch} />
             {error && <Text style={styles.errorText}>{error}</Text>}
             {loading && <ActivityIndicator size="large" color="#0000ff" />}
           </View>
         }
         ListFooterComponent={<View style={{ height: 60 }} />}
-        ListEmptyComponent={!loading && !users.length ? <Text style={styles.errorText}>Nenhum usuário encontrado</Text> : null}
+        ListEmptyComponent={
+          !loading && !users.length ? (
+            <Text style={styles.errorText}>Nenhum usuário encontrado.</Text>
+          ) : null
+        }
         contentContainerStyle={{ paddingBottom: 50 }}
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
