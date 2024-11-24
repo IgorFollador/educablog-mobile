@@ -32,17 +32,22 @@ const HomePage = () => {
   useEffect(() => {
     fetchPosts();
   }, [currentPage]);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
 
   const fetchPosts = async (query = '') => {
+    if (isFetching) return; // Evita chamadas simultâneas
+    setIsFetching(true);
+  
     const apiUrl = Constants.expoConfig.extra.PUBLIC_API_URL;
     const postsLimit = Constants.expoConfig.extra.PUBLIC_POSTS_LIMIT || '10';
-
+  
     if (!apiUrl) {
       setError('A URL da API não está definida corretamente. Verifique as variáveis de ambiente.');
       setLoading(false);
+      setIsFetching(false);
       return;
     }
-
+  
     try {
       setLoading(true);
       const response = query
@@ -59,12 +64,13 @@ const HomePage = () => {
               pagina: currentPage,
             },
           });
-
+  
       setLastUpdate(formatDate(new Date()));
       setPosts(response.data);
       setTotalPages(Math.ceil(response.headers['x-total-count'] / parseInt(postsLimit, 10)));
       setError('');
     } catch (err) {
+      // Mesma lógica de tratamento de erro
       if (axios.isAxiosError(err)) {
         if (err.response) {
           if (err.response.status === 404) {
@@ -84,8 +90,10 @@ const HomePage = () => {
       }
     } finally {
       setLoading(false);
+      setIsFetching(false); // Libera após o término da requisição
     }
   };
+  
 
   const handleSearch = (query: string) => {
     setCurrentPage(1);
