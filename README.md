@@ -1,50 +1,113 @@
-# Welcome to your Expo app 👋
+README - EducaBlog Mobile Application
+=====================================
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+EducaBlog
+---------
 
-## Get started
+**EducaBlog** é uma aplicação que conecta professores e alunos por meio de postagens, oferecendo uma plataforma intuitiva para interação e compartilhamento de conhecimento. Desenvolvido com **React Native**, o aplicativo traz a funcionalidade do EducaBlog Web para dispositivos móveis, garantindo uma experiência acessível e eficiente.
 
-1. Install dependencies
+* * *
 
-   ```bash
-   npm install
-   ```
+Integrantes do Projeto
+----------------------
 
-2. Start the app
+*   **Grupo 26**
+*   Ailton Lima de Andrade
+*   Caio Cesar de Deus
+*   Igor Dallazen Follador
+*   Marco Luis Alday
 
-   ```bash
-    npx expo start
-   ```
+* * *
 
-In the output, you'll find options to open the app in a
+Descrição do Projeto
+--------------------
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+O **EducaBlog Mobile** é uma evolução das fases anteriores do Tech Challenge. Após implementar o backend em NestJS e o front-end web em React e Next.js, o foco agora está na mobilidade. Professores e alunos podem acessar recursos completos de gerenciamento e interação com postagens diretamente de seus dispositivos móveis.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Funcionalidades Principais
 
-## Get a fresh project
+*   **Alunos**:
+    *   Visualizar e buscar postagens.
+    *   Possibilidade de autenticação.
+*   **Professores**:
+    *   Criar, editar e deletar postagens.
+    *   Gerenciar usuários (alunos e professores), criação, edição e deleção.
+    *   Controle de postagens e gerenciamento de status (ativa/inativa).
+* * *
 
-When you're ready, run:
+Tecnologias Utilizadas
+----------------------
 
-```bash
-npm run reset-project
-```
+### Frontend Mobile
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+*   **Framework:** React Native
+*   Criação de componentes reutilizáveis.
+*   Desempenho fluido em Android e iOS.
+*   Integração com APIs nativas para uma experiência rica e escalável.
 
-## Learn more
+### Design
 
-To learn more about developing your project with Expo, look at the following resources:
+*   **Figma**
+*   Protótipos interativos para guiar o desenvolvimento do layout mobile.
+*   Consistência visual com o design web adaptado para telas menores.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Source Code Management
 
-## Join the community
+*   **GitHub**
+*   Versionamento do código e colaboração via pull requests e code reviews.
 
-Join our community of developers creating universal apps.
+### Backend
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+*   Desenvolvido com **NestJS**, integrando autenticação e gerenciamento de postagens.
+
+### Ferramenta CSS
+
+*   **StyleSheet CSS**
+*   Ferramenta nativa e integrada ao React Native.
+*   Usa JavaScript para definir estilos em um formato próximo ao CSS.
+*   É eficiente em termos de performance.
+
+
+* * *
+
+Como Usar
+---------
+
+### Configuração Inicial
+
+1.  **Clonar o repositório:**
+    
+        git clone https://github.com/IgorFollador/educablog-web
+    
+2.  **Instalar as dependências:**
+    
+        npm install
+    
+3.  **Iniciar o aplicativo:**
+    
+        npx expo start
+    
+
+
+Links Importantes
+-----------------
+
+*   **Protótipo de UX (Figma):** [Protótipo EducaBlog](https://www.figma.com/design/19ULgtwuq2rdpLHTXJ6KMS/EducaBlog---FrontEnd-UI?node-id=25-512&node-type=canvas)
+*   **Documentação Completa:** [EducaBlog Doc]([https://github.com/IgorFollador/educablog-web](https://docs.google.com/document/d/1GOtu_iQv0R1VUBTn5EQWYgNcvAFEe_2H5nN0n1QBD_I/edit?tab=t.0#heading=h.i7l6tfweg84v))
+*   **Vídeo de Demonstração:** [Vídeo no Google Drive](abcd)
+
+* * *
+
+Credenciais para Testes
+-----------------------
+
+*   **Usuário Administrativo:**
+*   Login: professor@teste.com
+*   Senha: 123456
+
+* * *
+
+Conclusão
+---------
+
+O **EducaBlog Mobile** oferece uma solução completa para professores e alunos interagirem de maneira prática e eficiente. Com um design responsivo e funcionalidades robustas, a aplicação é ideal para ambientes educacionais modernos.
