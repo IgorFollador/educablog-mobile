@@ -19,14 +19,19 @@ const SignInPage = () => {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const navigation = useNavigation<SignInPageNavigationProp>();
+  const { isAdmin } = useAuth();
 
   // Verifica se o status de autenticação mudou e navega para a PostManagementPage
   // Quando o status mudar, navegar para PostManagementPage
   useEffect(() => {
     if (status === 'authenticated') {
-      navigation.replace('PostManagementPage');
+      if (isAdmin()) {
+        navigation.replace('PostManagementPage');
+      } else {
+        navigation.replace('HomePage');
+      }
     }
-  }, [status, navigation]); 
+  }, [status, navigation]);
 
   const handleSubmit = async () => {
     setError('');
@@ -35,9 +40,7 @@ const SignInPage = () => {
     try {
       const isAuthenticated = await login(email, password);
 
-      if (isAuthenticated) {
-
-      } else {
+      if (!isAuthenticated) {
         setError('Login ou senha inválidos. Tente novamente.');
       }
     } catch (err) {

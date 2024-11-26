@@ -166,7 +166,7 @@ const PostPage = () => {
       }
     } catch (err) {
       setLoading(false);
-  
+
       if (axios.isAxiosError(err)) {
         if (err.response) {
           switch (err.response.status) {

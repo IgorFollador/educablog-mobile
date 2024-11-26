@@ -68,21 +68,21 @@ const UserList: React.FC<UserListProps> = ({
 
             <Text style={styles.label}>Nome:</Text>
             <Text style={styles.userInfo}>{user.pessoa?.nome || 'N/A'}</Text>
-  
+
             <Text style={styles.label}>Email:</Text>
             <Text style={styles.userInfo}>{user.pessoa?.email || 'N/A'}</Text>
-  
+
             <Text style={styles.label}>CPF:</Text>
             <Text style={styles.userInfo}>{formatCPF(user.pessoa?.cpf) || 'N/A'}</Text>
-  
+
             <Text style={styles.label}>Telefone:</Text>
             <Text style={styles.userInfo}>{formatPhone(user.pessoa?.telefone) || 'N/A'}</Text>
-  
+
             <Text style={styles.label}>Data de Nascimento:</Text>
             <Text style={styles.userInfo}>{formatDate(user.pessoa?.dataNascimento) || 'N/A'}</Text>
 
           </View>
-  
+
           <View style={styles.actions}>
             <TouchableOpacity
               onPress={() => onEdit && onEdit(user.id)}
