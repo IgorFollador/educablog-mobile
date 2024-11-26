@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { View, Text, StyleSheet } from 'react-native';
 import Navbar from './src/components/NavBar';
@@ -12,6 +12,7 @@ import UserPage from './src/admin/users/UserPage';
 import { createStackNavigator } from '@react-navigation/stack';
 import ViewPostPage from './src/posts/[id]/ViewPostPage';
 import UserManagementPage from './src/admin/users/UserManagementPage';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -26,7 +27,13 @@ export default function App() {
 }
 
 const MainContent = () => {
-  const { status, initializing } = useAuth(); // Incluindo "initializing" para o estado de carregamento
+  const { status, initializing, checkAndRefreshToken } = useAuth();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      checkAndRefreshToken();
+    }, [checkAndRefreshToken])
+  );
 
   if (initializing) {
     return (
@@ -48,10 +55,11 @@ const MainContent = () => {
           },
         })}
       >
+        {/* Rotas principais */}
         <Stack.Screen name="HomePage" component={HomePage} />
-        <Stack.Screen name="SignInPage" component={SignInPage}/>
+        <Stack.Screen name="SignInPage" component={SignInPage} />
         <Stack.Screen name="PostManagementPage" component={PostManagementPage} />
-        <Stack.Screen name="PostPage" component={PostPage}/>
+        <Stack.Screen name="PostPage" component={PostPage} />
         <Stack.Screen name="UserPage" component={UserPage} />
         <Stack.Screen name="ViewPostPage" component={ViewPostPage} />
         <Stack.Screen name="UserManagementPage" component={UserManagementPage} />
