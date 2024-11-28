@@ -221,7 +221,7 @@ const UserPage = () => {
       const fetchUser = async () => {
         setLoading(true);
         setError('');
-        
+  
         try {
           const token = await AsyncStorage.getItem('userToken');
           if (!token) {
@@ -236,15 +236,14 @@ const UserPage = () => {
           const user = response.data;
   
           setPessoaId(user.pessoa.id || '');
-          setLogin(user.login);
-          setSenha(undefined);  
+          setLogin(user.login || '');
+          setSenha(undefined);
           setTipo(user.tipo || 'aluno');
           setEmail(user.pessoa.email || '');
           setNome(user.pessoa.nome || '');
           setCPF(formatCPF(user.pessoa.cpf || ''));
           setTelefone(formatPhone(user.pessoa.telefone || ''));
           setDataNascimento(formatDate(user.pessoa.dataNascimento || ''));
-          
         } catch (err) {
           console.error('Erro ao carregar os dados do usuário:', err);
           setError('Erro ao carregar os dados do usuário.');
@@ -254,8 +253,19 @@ const UserPage = () => {
       };
   
       fetchUser();
+    } else {
+      // Redefinir campos para valores padrão no modo de criação
+      setPessoaId('');
+      setLogin('');
+      setSenha('');
+      setTipo('aluno');
+      setEmail('');
+      setNome('');
+      setCPF('');
+      setTelefone('');
+      setDataNascimento('');
     }
-  }, [userId]);
+  }, [userId]);  
 
   return (
     <ScrollView>
