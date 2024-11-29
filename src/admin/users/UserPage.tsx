@@ -142,7 +142,7 @@ const UserPage = () => {
       let result;
   
       if (userId) {
-        console.log('Chamou o alterar:', validation.data);
+        console.log('Alterando usuário');
   
         result = await axios.put(
           `${process.env.PUBLIC_API_URL}/usuario/${userId}`, validation.data,
@@ -151,7 +151,7 @@ const UserPage = () => {
           }
         );
       } else {
-        console.log('Chamou o criar:', validation.data);
+        console.log('Criando usuário');
   
         result = await axios.post(
           `${process.env.PUBLIC_API_URL}/usuario`, validation.data,
@@ -164,17 +164,12 @@ const UserPage = () => {
       setLoading(false);
   
       if (result.status === 201) {
-        Alert.alert('Sucesso', 'Usuário criado com sucesso!');
-  
-        setPessoaId('');
-        setLogin('');
-        setSenha('');
-        setTipo('aluno');
-        setEmail('');
-        setNome('');
-        setCPF('');
-        setTelefone('');
-        setDataNascimento('');
+        Alert.alert('Sucesso', 'Usuário criado com sucesso!', [
+          {
+            text: 'OK',
+            onPress: () => navigation.goBack(),
+          }
+        ]);
       }
   
       if (result.status === 200) {
@@ -226,7 +221,7 @@ const UserPage = () => {
       const fetchUser = async () => {
         setLoading(true);
         setError('');
-        
+  
         try {
           const token = await AsyncStorage.getItem('userToken');
           if (!token) {
@@ -241,15 +236,14 @@ const UserPage = () => {
           const user = response.data;
   
           setPessoaId(user.pessoa.id || '');
-          setLogin(undefined);
-          setSenha(undefined);  
+          setLogin(user.login || '');
+          setSenha(undefined);
           setTipo(user.tipo || 'aluno');
           setEmail(user.pessoa.email || '');
           setNome(user.pessoa.nome || '');
           setCPF(formatCPF(user.pessoa.cpf || ''));
           setTelefone(formatPhone(user.pessoa.telefone || ''));
           setDataNascimento(formatDate(user.pessoa.dataNascimento || ''));
-          
         } catch (err) {
           console.error('Erro ao carregar os dados do usuário:', err);
           setError('Erro ao carregar os dados do usuário.');
@@ -259,40 +253,37 @@ const UserPage = () => {
       };
   
       fetchUser();
+    } else {
+      // Redefinir campos para valores padrão no modo de criação
+      setPessoaId('');
+      setLogin('');
+      setSenha('');
+      setTipo('aluno');
+      setEmail('');
+      setNome('');
+      setCPF('');
+      setTelefone('');
+      setDataNascimento('');
     }
-  }, [userId]);
-  
-  const handleLoginChange = (newLogin: string) => {
-    setLogin(newLogin);
-  };  
-
-  const handleSenhaChange = (newSenha: string) => {
-    setSenha(newSenha);
-  };  
+  }, [userId]);  
 
   return (
     <ScrollView>
       <View style={styles.container}>
         <View style={styles.form}>
-          <Text style={styles.title}>Editar Usuário</Text>
+          <Text style={styles.title}>
+            {userId ? 'Editar Usuário' : 'Criar Usuário'}
+          </Text>
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
           <Text style={styles.label}>Login:</Text>
           <TextInput
             style={[styles.input, focusedField === 'login' && styles.focusedInput]}
             placeholder="Login"
-            value={
-              userId && login === undefined && focusedField !== 'login'
-                ? '******' 
-                : login 
-            }
-            onChangeText={setLogin} 
+            value={login}
+            onChangeText={setLogin}
             onFocus={() => setFocusedField('login')}
-            onBlur={() => {
-              if (!login && userId) setLogin(undefined); 
-              setFocusedField(null);
-            }}
-            secureTextEntry 
+            onBlur={() => setFocusedField(null)}
           />
 
           <Text style={styles.label}>Senha:</Text>

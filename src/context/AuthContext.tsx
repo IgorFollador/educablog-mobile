@@ -30,21 +30,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log('Renovação não necessária ou já em andamento.');
       return;
     }
-  
+
     const currentTime = Date.now();
     const expirationTime = parseInt((await AsyncStorage.getItem('tokenExpiration')) || '0', 10);
-  
+
     console.log('Dados do token:', { currentTime, expirationTime });
-  
+
     if (expirationTime === 0) {
       console.log('Token de expiração não encontrado.');
       return;
     }
-  
+
     const timeUntilExpiration = expirationTime - currentTime;
-  
+
     console.log('Tempo até a expiração:', timeUntilExpiration);
-  
+
     if (timeUntilExpiration <= 0 || timeUntilExpiration <= REFRESH_INTERVAL) {
       console.log('Token está próximo da expiração. Tentando renovar...');
       setIsRefreshing(true);
@@ -52,13 +52,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const newAccessToken = await refreshAccessToken();
         if (newAccessToken) {
           const newExpirationTime = currentTime + TOKEN_EXPIRATION_TIME;
-  
+
           setData(prevState =>
             prevState
               ? { ...prevState, token: newAccessToken, tokenExpiration: newExpirationTime }
               : { token: newAccessToken, tipo: 'default', refreshToken: '', tokenExpiration: newExpirationTime },
           );
-  
+
           await AsyncStorage.setItem('userToken', newAccessToken);
           await AsyncStorage.setItem('tokenExpiration', newExpirationTime.toString());
           console.log('Token renovado com sucesso.');
@@ -82,14 +82,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const refreshToken = await AsyncStorage.getItem('userRefreshToken');
       const tipo = (await AsyncStorage.getItem('userTipo')) || 'default';
       const tokenExpiration = parseInt((await AsyncStorage.getItem('tokenExpiration')) || '0', 10);
-  
+
       console.log('Dados armazenados:', { token, refreshToken, tipo, tokenExpiration });
-  
+
       if (token) {
         console.log('Token encontrado. Validando...');
         const isTokenValid = await verifyToken(token);
         console.log('Token válido?', isTokenValid);
-  
+
         if (isTokenValid) {
           setData({ token, tipo, refreshToken: refreshToken || '', tokenExpiration });
           setStatus('authenticated');
@@ -118,16 +118,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       setInitializing(false);
     };
-  
+
     checkAuth();
-  
+
     const intervalId = setInterval(() => {
       if (status === 'authenticated') {
         console.log('Verificando necessidade de renovar o token...');
         checkAndRefreshToken();
       }
     }, REFRESH_INTERVAL);
-  
+
     return () => clearInterval(intervalId);
   }, [status]);
 
@@ -136,17 +136,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const response = await authenticate(email, password);
       console.log('Resposta do serviço de autenticação:', response);
-  
+
       if (response && response.token) {
         const { token, tipo = 'default', refreshToken } = response;
         const expirationTime = Date.now() + TOKEN_EXPIRATION_TIME;
-  
+
         setData({ token, tipo, refreshToken, tokenExpiration: expirationTime });
         await AsyncStorage.setItem('userToken', token);
         await AsyncStorage.setItem('userTipo', tipo);
         await AsyncStorage.setItem('userRefreshToken', refreshToken);
         await AsyncStorage.setItem('tokenExpiration', expirationTime.toString());
-  
+
         console.log('Login bem-sucedido. Dados armazenados.');
         setStatus('authenticated');
         return true;
@@ -154,7 +154,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.log('Erro no login:', error);
     }
-  
+
     Alert.alert('Erro', 'Falha no login. Por favor, tente novamente.');
     console.log('Login falhou. Definindo status como não autenticado.');
     setStatus('unauthenticated');

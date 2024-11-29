@@ -27,7 +27,7 @@ export default function App() {
 }
 
 const MainContent = () => {
-  const { status, initializing, checkAndRefreshToken } = useAuth();
+  const { status, initializing, checkAndRefreshToken, isAdmin } = useAuth();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -47,7 +47,11 @@ const MainContent = () => {
     <View style={styles.container}>
       <Stack.Navigator
         id={undefined}
-        initialRouteName={status === 'authenticated' ? 'PostManagementPage' : 'HomePage'}
+        initialRouteName={
+          status === 'authenticated' ?
+            isAdmin() ? 'PostManagementPage' : 'HomePage'
+          : 'HomePage'
+        }
         screenOptions={({ route }) => ({
           header: () => {
             const showLoginButton = route.name !== 'SignInPage';
