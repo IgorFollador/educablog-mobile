@@ -105,7 +105,7 @@ Credenciais para Testes
 *   Senha: 123456
 
 *   **Usuário Aluno:**
-*   Login: alunor@teste.com
+*   Login: aluno@teste.com
 *   Senha: 123456
 
 * * *
