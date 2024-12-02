@@ -64,7 +64,6 @@ Tecnologias Utilizadas
 
 *   **StyleSheet CSS**
 *   Ferramenta nativa e integrada ao React Native.
-*   Usa JavaScript para definir estilos em um formato próximo ao CSS.
 *   É eficiente em termos de performance.
 
 
@@ -77,7 +76,7 @@ Como Usar
 
 1.  **Clonar o repositório:**
     
-        git clone https://github.com/IgorFollador/educablog-web
+        git clone https://github.com/IgorFollador/educablog-mobile
     
 2.  **Instalar as dependências:**
     
@@ -93,8 +92,8 @@ Links Importantes
 -----------------
 
 *   **Protótipo de UX (Figma):** [Protótipo EducaBlog](https://www.figma.com/design/19ULgtwuq2rdpLHTXJ6KMS/EducaBlog---FrontEnd-UI?node-id=25-512&node-type=canvas)
-*   **Documentação Completa:** [EducaBlog Doc]([https://github.com/IgorFollador/educablog-web](https://docs.google.com/document/d/1GOtu_iQv0R1VUBTn5EQWYgNcvAFEe_2H5nN0n1QBD_I/edit?tab=t.0#heading=h.i7l6tfweg84v))
-*   **Vídeo de Demonstração:** [Vídeo no Google Drive](abcd)
+*   **Documentação Completa:** [EducaBlog Doc](https://drive.google.com/drive/folders/1dZ-XE8y046M42XpLmcHl-tU7RD7eT2aj?usp=drive_link)
+*   **Vídeo de Demonstração:** [Vídeo no Google Drive](https://drive.google.com/drive/folders/1dZ-XE8y046M42XpLmcHl-tU7RD7eT2aj?usp=drive_link)
 
 * * *
 
@@ -103,6 +102,10 @@ Credenciais para Testes
 
 *   **Usuário Administrativo:**
 *   Login: professor@teste.com
+*   Senha: 123456
+
+*   **Usuário Aluno:**
+*   Login: aluno@teste.com
 *   Senha: 123456
 
 * * *
